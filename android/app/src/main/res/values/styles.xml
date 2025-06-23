@@ -1,0 +1,6 @@
+<resources>
+    <!-- Custom minimal launch theme with your preferred background color -->
+    <style name="NormalTheme" parent="@android:style/Theme.Light.NoTitleBar">
+        <item name="android:windowBackground">@android:color/black</item> <!-- or your splash background color -->
+    </style>
+</resources>
