@@ -108,7 +108,7 @@ class AttendanceHistoryController extends GetxController {
       }
       
       var response = await NetworkHttps.postRequest(API.attendanceHistory,{"workspace_id": Prefs.getString(AppConstant.workSpaceId),"type":"monthly","month":month,"year":year});
-      if (response != null && response['status'] == 1) {
+      if (response != null && (response['status'] == 1 || response['status'] == 200)) {
         AttendanceHistory attendanceHistoryResponse = AttendanceHistory.fromJson(response);
         attendanceHistoryList.assignAll(attendanceHistoryResponse.data!);
       }

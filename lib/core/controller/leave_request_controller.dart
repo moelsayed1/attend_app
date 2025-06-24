@@ -197,7 +197,7 @@ class LeaveRequestController extends GetxController {
     } else {
       var response = await NetworkHttps.postRequest(API.getLeavesTypes,
           {"workspace_id": Prefs.getString(AppConstant.workSpaceId)});
-      if (response != null && response["status"] == 1) {
+      if (response != null && (response["status"] == 1 || response["status"] == 200)) {
         isLoading.value=false;
 
         leaveTypeResponse=LeaveTypesResponse.fromJson(response);
@@ -213,6 +213,7 @@ class LeaveRequestController extends GetxController {
         leaveType.value=leaveTypes.first.title.toString();
         leaveId.value=leaveTypes.first.id.toString();
         leaveTypes.refresh();
+        print("Leave types loaded: "+leaveTypes.length.toString());
       } else if (response != null) {
         isLoading.value=false;
         commonToast(response["message"]);

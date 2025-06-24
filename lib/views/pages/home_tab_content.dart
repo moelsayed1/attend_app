@@ -85,10 +85,13 @@ class HomeTabContent extends StatelessWidget {
               IconButton(
                 iconSize: 100,
                 onPressed: () async {
+                  print('DEBUG: Fingerprint pressed. isCheckIn: ' + homeController.isCheckIn.value.toString() + ', attendanceId: ' + homeController.attendanceId.value);
                   if (!homeController.isCheckIn.value) {
                     await handleLocationBasedAction(homeController.recordCheckIn);
+                    await homeController.homeApi();
                   } else {
                     await handleLocationBasedAction(homeController.recordCheckOut);
+                    await homeController.homeApi();
                   }
                 },
                 icon: assetSvdImageWidget(
@@ -115,7 +118,9 @@ class HomeTabContent extends StatelessWidget {
                     child: CommonButton(
                       title: "Check Out",
                       onPressed: !homeController.isCheckIn.value ? null : () async {
+                        print('DEBUG: Check Out button pressed. isCheckIn: ' + homeController.isCheckIn.value.toString() + ', attendanceId: ' + homeController.attendanceId.value);
                         await handleLocationBasedAction(homeController.recordCheckOut);
+                        await homeController.homeApi();
                       },
                       buttonColor: AppColor.cRed,
                     ),

@@ -176,7 +176,7 @@ class LeaveRequestScreen extends StatelessWidget {
                     child: DropdownButton(
                       icon: Icon(Icons.arrow_drop_down),
                       dropdownColor: AppColor.cWhite,
-                      value: requestController.leaveType.value,
+                      value: requestController.leaveType.value.isEmpty ? null : requestController.leaveType.value,
                       iconSize: 24,
                       isExpanded: true,
                       style: TextStyle(color: Colors.black, fontSize: 16),
@@ -190,10 +190,12 @@ class LeaveRequestScreen extends StatelessWidget {
                           .map((LeaveType valueItem) {
                         return DropdownMenuItem(
                             value: valueItem.title,
-                            child: Text("${valueItem.title}"),
-                            onTap: (){
-                                    requestController.leaveId.value=valueItem.id.toString();
-                            },);
+                            child: Text(
+                              "${valueItem.title} (${valueItem.used ?? 0}/${valueItem.days ?? 0} used)",
+                            ),
+                            onTap: () {
+                              requestController.leaveId.value = valueItem.id.toString();
+                            });
                       }).toList(),
                     ),
                   ),

@@ -58,7 +58,7 @@ class HomeController extends GetxController {
     loadCheckInOutTimes();
     addTeamMeeting(); // Add initial team meeting
     Get.put(AttendanceHistoryController()); // Initialize AttendanceHistoryController
-    Prefs.setString('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDY4NjYxMSwiZXhwIjoxNzUwNjkwMjExLCJuYmYiOjE3NTA2ODY2MTEsImp0aSI6ImNzeFoycThlNTVmRkp2NEYiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.2jA-t-9GkGraSa7Uxf8uFzFrWyu17dzWXNVTg0jVqgs');
+    Prefs.setString('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDc2NzEwOCwiZXhwIjoxNzUwNzcwNzA4LCJuYmYiOjE3NTA3NjcxMDgsImp0aSI6IjY0ZTM4RjlEbkkzTVY2MkciLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.V_3EqIcVlTq1tchlVC_kMsiz4sL7iLE2y7ZO64w6G8Q');
   }
 
   @override
@@ -105,44 +105,82 @@ class HomeController extends GetxController {
     Loader.showLoader();
     try {
       Map<String, String> headers = {
-        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDY4NjYxMSwiZXhwIjoxNzUwNjkwMjExLCJuYmYiOjE3NTA2ODY2MTEsImp0aSI6ImNzeFoycThlNTVmRkp2NEYiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.2jA-t-9GkGraSa7Uxf8uFzFrWyu17dzWXNVTg0jVqgs',
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDc2NzEwOCwiZXhwIjoxNzUwNzcwNzA4LCJuYmYiOjE3NTA3NjcxMDgsImp0aSI6IjY0ZTM4RjlEbkkzTVY2MkciLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.V_3EqIcVlTq1tchlVC_kMsiz4sL7iLE2y7ZO64w6G8Q',
         // ...other headers
       };
       Map<String, dynamic> requestData = {
         "workspace_id": Prefs.getString(AppConstant.workSpaceId),
-        "type": type,
-        "attendence_id": attendanceId.value
+        "type": type
       };
+      if (attendanceId.value.isNotEmpty) {
+        requestData["attendence_id"] = attendanceId.value;
+      }
+      // Add current date and time
+      final now = DateTime.now();
+      requestData["current_date"] = DateFormat('yyyy-MM-dd').format(now);
+      requestData["current_time"] = DateFormat('HH:mm:ss').format(now);
       // Add location data if available
       if (latitude != null) {
-        requestData["latitude"] = latitude.toString();
+        requestData["current_latitude"] = latitude.toString();
       }
       if (longitude != null) {
-        requestData["longitude"] = longitude.toString();
+        requestData["current_longitude"] = longitude.toString();
       }
       print('POST API URL===> ' + API.isClockIn);
       print('data===> ' + requestData.toString());
       var response = await NetworkHttps.postRequest(API.isClockIn, requestData);
-      print('isClockInApi response: ' + response.toString());
-      if (response['status'] == 1) {
-        var attendanceReport = ClockInResponse.fromJson(response);
-        Prefs.setString(
-            Prefs.Attendance_Id, attendanceReport.data!.attendenceId.toString());
-        checkInTime.value = attendanceReport.data!.clockIn ?? "--";
-        checkOutTime.value = attendanceReport.data!.clockOut ?? "--";
-        totalHours.value = attendanceReport.data!.totalHours ?? "--";
-        attendanceId.value = attendanceReport.data!.attendenceId.toString();
-        
+      print('isCheckInApi response: ' + response.toString());
+      // Handle success (clock in or clock out)
+      if (response['status'] == 1 || response['status'] == 200) {
+        var data = response['data'];
+        isCheckIn.value = data['is_clockin'] == 1; 
+        attendanceId.value = data['attendence_id']?.toString() ?? "";
+        checkInTime.value = data['clock_in'] ?? "--";
+        checkOutTime.value = data['clock_out'] ?? "--";
+        totalHours.value = data['total_hours'] ?? "--";
+        print('DEBUG: isCheckInApi (success) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
         // Refresh attendance history after check-in/out
         Get.find<AttendanceHistoryController>().attendanceHistory(
           Get.find<AttendanceHistoryController>().currentMonth.value.toString(),
           Get.find<AttendanceHistoryController>().currentYear.value.toString(),
         );
         return true; // Indicate success
-      } else {
-        // Show the API's error message to the user
+      } 
+      // Handle already clocked in (clock in fail)
+      else if (response['status'] == 422 && response['message'] == "Please Employee First Clock Out.") {
+        var data = response['data'];
+        isCheckIn.value = data['is_clockin'] == 1;
+        attendanceId.value = data['attendence_id']?.toString() ?? "";
+        checkInTime.value = data['clock_in'] ?? "--";
+        checkOutTime.value = data['clock_out'] ?? "--";
+        print('DEBUG: isCheckInApi (already clocked in) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+        commonToast(response['message']);
+        await homeApi();
+        return false;
+      }
+      // Handle already clocked out (clock out fail)
+      else if (response['status'] == 422 && response['message'] == "Please Employee First Clock In.") {
+        var data = response['data'];
+        isCheckIn.value = data['is_clockin'] == 1;
+        attendanceId.value = data['attendence_id']?.toString() ?? "";
+        checkInTime.value = data['clock_in'] ?? "--";
+        checkOutTime.value = data['clock_out'] ?? "--";
+        print('DEBUG: isCheckInApi (already clocked out) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+        commonToast(response['message']);
+        await homeApi();
+        return false;
+      }
+      // Handle not in area
+      else if (response['status'] == 403 && response['message'] == "You are not within allowed company location.") {
+        commonToast(response['message']);
+        print('DEBUG: isCheckInApi (not in area)');
+        return false;
+      }
+      // Handle other errors
+      else {
         String errorMsg = response["message"] ?? "An error occurred.";
         commonToast(errorMsg);
+        print('DEBUG: isCheckInApi (other error) -> ' + errorMsg);
         return false; // Indicate failure
       }
     } catch (e) {
@@ -172,20 +210,51 @@ class HomeController extends GetxController {
     Loader.showLoader();
     
     try {
-      // TODO: Integrate real API call here to fetch home data
-      // Example:
-      // var response = await NetworkHttps.postRequest(API.homeData, { ... });
-      // if (response['status'] == 1) {
-      //   checkInTime.value = response['data']['clockIn'] ?? "--";
-      //   checkOutTime.value = response['data']['clockOut'] ?? "--";
-      //   totalHours.value = response['data']['totalHours'] ?? "--";
-      //   // ...and so on
-      // } else {
-      //   commonToast(response["message"]);
-      // }
-      // For now, do not assign any static values.
+      // Call the real API to fetch home data
+      // There is no API.homeData, so we use API.isClockIn to get current attendance state
+      var response = await NetworkHttps.postRequest(API.isClockIn, {
+        "workspace_id": Prefs.getString(AppConstant.workSpaceId),
+        "type": "status" // Use a special type or as required by your backend to fetch status only
+      });
+      if (response != null && response['status'] == 1 && response['data'] != null) {
+        var data = response['data'];
+        // Update attendance state
+        isCheckIn.value = (data['is_clockin'] == 1 && (data['clock_out'] == null || data['clock_out'] == "00:00:00"));
+        attendanceId.value = data['attendance_id']?.toString() ?? "";
+        checkInTime.value = data['clock_in'] ?? "--";
+        checkOutTime.value = data['clock_out'] ?? "--";
+        totalHours.value = data['total_hours'] ?? "--";
+        print('DEBUG: homeApi -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+      } else {
+        // If no data, reset state
+        isCheckIn.value = false;
+        attendanceId.value = "";
+        checkInTime.value = "--";
+        checkOutTime.value = "--";
+        totalHours.value = "--";
+        print('DEBUG: homeApi (no data) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+      }
       announcementList.clear();
       teamMeetings.clear();
+
+      // Fetch meetings from real API
+      try {
+        var meetingsResponse = await NetworkHttps.postRequest(API.eventCalender, {
+          "workspace_id": Prefs.getString(AppConstant.workSpaceId)
+        });
+        teamMeetings.clear();
+        if (meetingsResponse != null && meetingsResponse['status'] == 200 && meetingsResponse['data'] != null) {
+          for (var meeting in meetingsResponse['data']) {
+            teamMeetings.add({
+              'title': meeting['meeting_title'] ?? '',
+              'description': meeting['meeting_description'] ?? '',
+              'date': meeting['meeting_date'] != null ? DateTime.parse(meeting['meeting_date']) : DateTime.now(),
+            });
+          }
+        }
+      } catch (e) {
+        print('Error fetching meetings: ' + e.toString());
+      }
     } catch (e) {
       commonToast("An error occurred. Please try again.");
     } finally {
@@ -219,7 +288,8 @@ class HomeController extends GetxController {
           Prefs.setString('check_in_latitude', (latitude ?? 0.0).toString());
           Prefs.setString('check_in_longitude', (longitude ?? 0.0).toString());
           startWorkTimer();
-          bool success = await isCheckInApi('in', latitude: latitude, longitude: longitude);
+          print('DEBUG: recordCheckIn (before API) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+          bool success = await isCheckInApi('clockin', latitude: latitude, longitude: longitude);
           if (!success) {
             isCheckIn.value = previousCheckInState; // Revert on failure
           }
@@ -230,6 +300,10 @@ class HomeController extends GetxController {
   }
 
   void recordCheckOut({double? latitude, double? longitude}) {
+    if (attendanceId.value.isEmpty) {
+      commonToast("No open attendance record found. Please clock in first.");
+      return;
+    }
     print('DEBUG: recordCheckOut called with latitude: ' + (latitude?.toString() ?? 'null') + ', longitude: ' + (longitude?.toString() ?? 'null'));
     Get.snackbar(
       'Confirm Check-out',
@@ -259,8 +333,12 @@ class HomeController extends GetxController {
           }
           _workTimer?.cancel();
           isTimerRunning.value = false;
-          bool success = await isCheckInApi('out', latitude: latitude, longitude: longitude);
-          if (!success) {
+          print('DEBUG: recordCheckOut (before API) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+          bool success = await isCheckInApi('clockout', latitude: latitude, longitude: longitude);
+          if (success) {
+            // Refresh state from backend after successful clock-out
+            await homeApi();
+          } else {
             isCheckIn.value = previousCheckInState;
           }
         },
@@ -279,13 +357,6 @@ class HomeController extends GetxController {
   }
 
   void addTeamMeeting() {
-    final now = DateTime.now();
-    final meetingTime = DateTime(now.year, now.month, now.day, 17, 0); // 5 PM
-    
-    teamMeetings.add({
-      'title': 'Team Meeting',
-      'description': 'Team meeting regarding productivity',
-      'date': meetingTime,
-    });
+    // This function is now unused since meetings are fetched from the API
   }
 }

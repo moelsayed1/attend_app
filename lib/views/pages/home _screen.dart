@@ -79,9 +79,9 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     homeController.announcementList.clear();
     // Initialize all controllers at once to prevent token validation on tab switch
-    Get.put(LeaveRequestController(), permanent: true);
-    Get.put(AttendanceHistoryController(), permanent: true);
-    Get.put(EventController(), permanent: true);
+    //Get.put(LeaveRequestController(), permanent: true);
+   // Get.put(AttendanceHistoryController(), permanent: true);
+    //Get.put(EventController(), permanent: true);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // homeController.homeApi();
     });

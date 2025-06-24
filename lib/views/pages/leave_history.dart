@@ -16,7 +16,7 @@ class LeaveHistory extends StatefulWidget {
 }
 
 class _LeaveHistoryState extends State<LeaveHistory> {
-  final LeaveRequestController leavesController = Get.find<LeaveRequestController>();
+  final LeaveRequestController leavesController = Get.put(LeaveRequestController());
 
   @override
   void initState() {
