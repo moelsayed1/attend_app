@@ -15,6 +15,7 @@ import 'package:attendance/views/widgets/team_meetings_section.dart';
 import 'package:attendance/views/widgets/announcements_section.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:attendance/utils/location_helper.dart';
+import 'package:attendance/utils/prefer.dart';
 
 class HomeTabContent extends StatelessWidget {
   final HomeController homeController;
@@ -107,7 +108,7 @@ class HomeTabContent extends StatelessWidget {
                   Expanded(
                     child: CommonButton(
                       title: "Check in",
-                      onPressed: homeController.isCheckIn.value ? null : () async {
+                      onPressed: (homeController.isCheckIn.value && !homeController.isCheckOut.value) ? null : () async {
                         await handleLocationBasedAction(homeController.recordCheckIn);
                       },
                       buttonColor: AppColor.primaryColor,
@@ -117,17 +118,19 @@ class HomeTabContent extends StatelessWidget {
                   Expanded(
                     child: CommonButton(
                       title: "Check Out",
-                      onPressed: !homeController.isCheckIn.value ? null : () async {
-                        print('DEBUG: Check Out button pressed. isCheckIn: ' + homeController.isCheckIn.value.toString() + ', attendanceId: ' + homeController.attendanceId.value);
-                        await handleLocationBasedAction(homeController.recordCheckOut);
-                        await homeController.homeApi();
-                      },
+                      onPressed: (homeController.isCheckIn.value && !homeController.isCheckOut.value && homeController.attendanceId.value.isNotEmpty)
+                          ? () async {
+                              print('DEBUG: [Button] Check Out enabled. isCheckIn: ${homeController.isCheckIn.value}, isCheckOut: ${homeController.isCheckOut.value}, attendanceId: ${homeController.attendanceId.value}');
+                              await handleLocationBasedAction(homeController.recordCheckOut);
+                            }
+                          : null,
                       buttonColor: AppColor.cRed,
                     ),
                   ),
                 ],
               ),
               verticalSpace(40),
+             
               Align(
                 alignment: Alignment.topLeft,
                 child: Text(

@@ -15,7 +15,7 @@ class FaceScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(FaceScanController());
-    final double circleSize = 220.w;
+    final double circleSize = 270.w;
 
     return Scaffold(
       backgroundColor: AppColor.appBackGround,
@@ -58,27 +58,60 @@ class FaceScanScreen extends StatelessWidget {
                       children: [
                         GetBuilder<FaceScanController>(
                           builder: (controller) {
+                            if (controller.controller == null) {
+                              return Container(
+                                width: circleSize,
+                                height: circleSize,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: AppColor.cDarkGreyFont,
+                                    style: BorderStyle.solid,
+                                    width: 2.0.w,
+                                  ),
+                                ),
+                                child: const Center(child: CircularProgressIndicator()),
+                              );
+                            }
+                            
                             return FutureBuilder<void>(
                               future: controller.initializeControllerFuture,
                               builder: (context, snapshot) {
                                 if (snapshot.connectionState == ConnectionState.done) {
                                   if (controller.controller != null &&
                                       controller.controller!.value.isInitialized) {
-                                    return ClipOval(
-                                      child: SizedBox(
-                                        width: circleSize,
-                                        height: circleSize,
-                                        child: Transform.scale(
-                                          scale: 1.5,
-                                          child: Center(
-                                            child: AspectRatio(
-                                              aspectRatio: 1 / controller.controller!.value.aspectRatio,
-                                              child: CameraPreview(controller.controller!),
+                                    try {
+                                      return ClipOval(
+                                        child: SizedBox(
+                                          width: circleSize,
+                                          height: circleSize,
+                                          child: Transform.scale(
+                                            scale: 1.5,
+                                            child: Center(
+                                              child: AspectRatio(
+                                                aspectRatio: 1 / controller.controller!.value.aspectRatio,
+                                                child: CameraPreview(controller.controller!),
+                                              ),
                                             ),
                                           ),
                                         ),
-                                      ),
-                                    );
+                                      );
+                                    } catch (e) {
+                                      print('Camera preview error: $e');
+                                      return Container(
+                                        width: circleSize,
+                                        height: circleSize,
+                                        decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          border: Border.all(
+                                            color: AppColor.cRed,
+                                            style: BorderStyle.solid,
+                                            width: 2.0.w,
+                                          ),
+                                        ),
+                                        child: Center(child: Text('Camera Error', style: TextStyle(fontSize: 14.sp, color: AppColor.cRed))),
+                                      );
+                                    }
                                   } else {
                                     return Container(
                                       width: circleSize,
@@ -94,6 +127,48 @@ class FaceScanScreen extends StatelessWidget {
                                       child: Center(child: Text('Camera Error', style: TextStyle(fontSize: 14.sp))),
                                     );
                                   }
+                                } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                  // Add a fallback timeout for loading
+                                  return FutureBuilder(
+                                    future: Future.delayed(const Duration(seconds: 10)),
+                                    builder: (context, timeoutSnapshot) {
+                                      if (timeoutSnapshot.connectionState == ConnectionState.done) {
+                                        return Container(
+                                          width: circleSize,
+                                          height: circleSize,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: AppColor.cRed,
+                                              style: BorderStyle.solid,
+                                              width: 2.0.w,
+                                            ),
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              'Camera is taking too long to load.\nPlease check permissions or restart the app.',
+                                              style: TextStyle(color: AppColor.cRed, fontSize: 14.sp),
+                                              textAlign: TextAlign.center,
+                                            ),
+                                          ),
+                                        );
+                                      } else {
+                                        return Container(
+                                          width: circleSize,
+                                          height: circleSize,
+                                          decoration: BoxDecoration(
+                                            shape: BoxShape.circle,
+                                            border: Border.all(
+                                              color: AppColor.cDarkGreyFont,
+                                              style: BorderStyle.solid,
+                                              width: 2.0.w,
+                                            ),
+                                          ),
+                                          child: const Center(child: CircularProgressIndicator()),
+                                        );
+                                      }
+                                    },
+                                  );
                                 } else {
                                   return Container(
                                     width: circleSize,

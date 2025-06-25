@@ -19,6 +19,7 @@ class HomeController extends GetxController {
   static HomeController get to => Get.find();
   
   RxBool isCheckIn = false.obs;
+  RxBool isCheckOut = false.obs;
   RxString checkInTime = "00:00".obs;
   RxString checkOutTime = "00:00".obs;
   RxString totalHours = "00:00".obs;
@@ -37,10 +38,10 @@ class HomeController extends GetxController {
   RxString checkOutDisplayTime = "--:--".obs;
 
   // Internal DateTime objects for calculation
-  DateTime? _checkInDateTime;
-  DateTime? _checkOutDateTime;
+  DateTime? checkInDateTime;
+  DateTime? checkOutDateTime;
 
-  Timer? _workTimer;
+  Timer? workTimer;
   final Rx<Duration> remainingTime = const Duration(hours: 8).obs;
   final RxBool isTimerRunning = false.obs;
 
@@ -58,13 +59,13 @@ class HomeController extends GetxController {
     loadCheckInOutTimes();
     addTeamMeeting(); // Add initial team meeting
     Get.put(AttendanceHistoryController()); // Initialize AttendanceHistoryController
-    Prefs.setString('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDc2NzEwOCwiZXhwIjoxNzUwNzcwNzA4LCJuYmYiOjE3NTA3NjcxMDgsImp0aSI6IjY0ZTM4RjlEbkkzTVY2MkciLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.V_3EqIcVlTq1tchlVC_kMsiz4sL7iLE2y7ZO64w6G8Q');
+    Prefs.setString('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDg1OTU5OSwiZXhwIjoxNzUwODYzMTk5LCJuYmYiOjE3NTA4NTk1OTksImp0aSI6IlduRHFERVp5U0VDcTd6YWsiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.n5bHfUZmTJMp1pkSSdcaiUbjsJN1HY84y7SuGvVQYTI');
   }
 
   @override
   void onClose() {
     _timer.cancel();
-    _workTimer?.cancel();
+    workTimer?.cancel();
     pageController.dispose(); // Dispose the pageController
     WidgetsBinding.instance.removeObserver(AppLifecycleListener());
     super.onClose();
@@ -83,11 +84,11 @@ class HomeController extends GetxController {
   void startWorkTimer() {
     isTimerRunning.value = true;
     remainingTime.value = const Duration(hours: 8);
-    _workTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    workTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (remainingTime.value.inSeconds > 0) {
         remainingTime.value = remainingTime.value - const Duration(seconds: 1);
       } else {
-        _workTimer?.cancel();
+        workTimer?.cancel();
         isTimerRunning.value = false;
         Get.snackbar(
           'Time Complete',
@@ -105,7 +106,7 @@ class HomeController extends GetxController {
     Loader.showLoader();
     try {
       Map<String, String> headers = {
-        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDc2NzEwOCwiZXhwIjoxNzUwNzcwNzA4LCJuYmYiOjE3NTA3NjcxMDgsImp0aSI6IjY0ZTM4RjlEbkkzTVY2MkciLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.V_3EqIcVlTq1tchlVC_kMsiz4sL7iLE2y7ZO64w6G8Q',
+        'Authorization': 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDg1OTc0NCwiZXhwIjoxNzUwODYzMzQ0LCJuYmYiOjE3NTA4NTk3NDQsImp0aSI6IlhSZmVjZkRNc1lMQUhLUHQiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.IKTjW46_YKp4aCFG6CDIgZG5Xv2iIz-jNB7Rp3kmAIs',
         // ...other headers
       };
       Map<String, dynamic> requestData = {
@@ -134,11 +135,12 @@ class HomeController extends GetxController {
       if (response['status'] == 1 || response['status'] == 200) {
         var data = response['data'];
         isCheckIn.value = data['is_clockin'] == 1; 
+        isCheckOut.value = data.containsKey('clock_out') && data['clock_out'] != null && data['clock_out'] != '00:00:00';
         attendanceId.value = data['attendence_id']?.toString() ?? "";
         checkInTime.value = data['clock_in'] ?? "--";
         checkOutTime.value = data['clock_out'] ?? "--";
         totalHours.value = data['total_hours'] ?? "--";
-        print('DEBUG: isCheckInApi (success) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+        print('DEBUG: isCheckInApi (success) -> isCheckIn: ' + isCheckIn.value.toString() + ', isCheckOut: ' + isCheckOut.value.toString() + ', attendanceId: ' + attendanceId.value);
         // Refresh attendance history after check-in/out
         Get.find<AttendanceHistoryController>().attendanceHistory(
           Get.find<AttendanceHistoryController>().currentMonth.value.toString(),
@@ -148,24 +150,27 @@ class HomeController extends GetxController {
       } 
       // Handle already clocked in (clock in fail)
       else if (response['status'] == 422 && response['message'] == "Please Employee First Clock Out.") {
+        // Already checked in, so can't check in again
         var data = response['data'];
         isCheckIn.value = data['is_clockin'] == 1;
+        isCheckOut.value = false;
         attendanceId.value = data['attendence_id']?.toString() ?? "";
         checkInTime.value = data['clock_in'] ?? "--";
         checkOutTime.value = data['clock_out'] ?? "--";
-        print('DEBUG: isCheckInApi (already clocked in) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+        print('DEBUG: isCheckInApi (already clocked in) -> isCheckIn: ' + isCheckIn.value.toString() + ', isCheckOut: ' + isCheckOut.value.toString() + ', attendanceId: ' + attendanceId.value);
         commonToast(response['message']);
         await homeApi();
         return false;
       }
       // Handle already clocked out (clock out fail)
       else if (response['status'] == 422 && response['message'] == "Please Employee First Clock In.") {
-        var data = response['data'];
-        isCheckIn.value = data['is_clockin'] == 1;
-        attendanceId.value = data['attendence_id']?.toString() ?? "";
-        checkInTime.value = data['clock_in'] ?? "--";
-        checkOutTime.value = data['clock_out'] ?? "--";
-        print('DEBUG: isCheckInApi (already clocked out) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+        // Not checked in, so can't check out
+        isCheckIn.value = false;
+        isCheckOut.value = false;
+        attendanceId.value = "";
+        checkInTime.value = "--";
+        checkOutTime.value = "--";
+        print('DEBUG: isCheckInApi (already clocked out) -> isCheckIn: ' + isCheckIn.value.toString() + ', isCheckOut: ' + isCheckOut.value.toString() + ', attendanceId: ' + attendanceId.value);
         commonToast(response['message']);
         await homeApi();
         return false;
@@ -219,12 +224,13 @@ class HomeController extends GetxController {
       if (response != null && response['status'] == 1 && response['data'] != null) {
         var data = response['data'];
         // Update attendance state
-        isCheckIn.value = (data['is_clockin'] == 1 && (data['clock_out'] == null || data['clock_out'] == "00:00:00"));
+        isCheckIn.value = data['is_clockin'] == 1;
+        isCheckOut.value = data.containsKey('clock_out') && data['clock_out'] != null && data['clock_out'] != '00:00:00';
         attendanceId.value = data['attendance_id']?.toString() ?? "";
         checkInTime.value = data['clock_in'] ?? "--";
         checkOutTime.value = data['clock_out'] ?? "--";
         totalHours.value = data['total_hours'] ?? "--";
-        print('DEBUG: homeApi -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+        print('DEBUG: homeApi -> isCheckIn: ' + isCheckIn.value.toString() + ', isCheckOut: ' + isCheckOut.value.toString() + ', attendanceId: ' + attendanceId.value);
       } else {
         // If no data, reset state
         isCheckIn.value = false;
@@ -282,7 +288,7 @@ class HomeController extends GetxController {
           final previousCheckInState = isCheckIn.value;
           isCheckIn.value = true; // Optimistic update
           final now = DateTime.now();
-          _checkInDateTime = now;
+          checkInDateTime = now;
           checkInDisplayTime.value = DateFormat('hh:mm a').format(now);
           Prefs.setString('check_in_time', checkInDisplayTime.value);
           Prefs.setString('check_in_latitude', (latitude ?? 0.0).toString());
@@ -305,6 +311,7 @@ class HomeController extends GetxController {
       return;
     }
     print('DEBUG: recordCheckOut called with latitude: ' + (latitude?.toString() ?? 'null') + ', longitude: ' + (longitude?.toString() ?? 'null'));
+    print('DEBUG: recordCheckOut - attendanceId before API: ' + attendanceId.value);
     Get.snackbar(
       'Confirm Check-out',
       'Are you sure you want to check out now?',
@@ -318,23 +325,25 @@ class HomeController extends GetxController {
           final previousCheckInState = isCheckIn.value;
           isCheckIn.value = false;
           final now = DateTime.now();
-          _checkOutDateTime = now;
+          checkOutDateTime = now;
           checkOutDisplayTime.value = DateFormat('hh:mm a').format(now);
           Prefs.setString('check_out_time', checkOutDisplayTime.value);
           Prefs.setString('check_out_latitude', (latitude ?? 0.0).toString());
           Prefs.setString('check_out_longitude', (longitude ?? 0.0).toString());
           // Calculate total time
-          if (_checkInDateTime != null) {
-            final difference = now.difference(_checkInDateTime!);
+          if (checkInDateTime != null) {
+            final difference = now.difference(checkInDateTime!);
             final hours = difference.inHours;
             final minutes = difference.inMinutes.remainder(60);
             totalHours.value = '$hours:${minutes.toString().padLeft(2, '0')}';
             Prefs.setString('total_hours', totalHours.value);
           }
-          _workTimer?.cancel();
+          workTimer?.cancel();
           isTimerRunning.value = false;
           print('DEBUG: recordCheckOut (before API) -> isCheckIn: ' + isCheckIn.value.toString() + ', attendanceId: ' + attendanceId.value);
+          print('DEBUG: recordCheckOut - calling isCheckInApi with attendanceId: ' + attendanceId.value);
           bool success = await isCheckInApi('clockout', latitude: latitude, longitude: longitude);
+          print('DEBUG: recordCheckOut - checkout API result: ' + success.toString());
           if (success) {
             // Refresh state from backend after successful clock-out
             await homeApi();

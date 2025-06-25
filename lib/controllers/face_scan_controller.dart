@@ -3,12 +3,8 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:attendance/views/pages/home _screen.dart';
 import 'package:flutter/material.dart';
-import 'dart:io';
-import 'package:attendance/utils/app_constant.dart';
-import 'package:attendance/utils/base_api.dart';
-import 'package:attendance/utils/prefer.dart';
-import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:http/http.dart' as http;
+import 'dart:io';
 
 class FaceScanController extends GetxController {
   CameraController? controller;
@@ -73,86 +69,69 @@ class FaceScanController extends GetxController {
 
   Future<void> captureAndSendPhoto() async {
     if (controller == null || !controller!.value.isInitialized || isCapturing) {
+      print('[FaceScanController] Camera not ready or already capturing.');
       return;
     }
 
     isCapturing = true;
     update();
+    print('[FaceScanController] Starting photo capture...');
 
     try {
       final XFile file = await controller!.takePicture();
+      print('[FaceScanController] Photo captured. Path: ' + file.path);
       if (file.path.isEmpty) {
-        Get.snackbar('Error', 'Failed to capture photo.');
+        print('[FaceScanController] Failed to capture photo: file path is empty.');
+        Get.snackbar('Error', 'لم يتم التقاط الصورة بنجاح');
         isCapturing = false;
         update();
         return;
       }
 
-      Loader.showLoader();
-      String url = API.baseUrl + API.dailyImage;
-      var headers = {
-        "Authorization": 'Bearer '+Prefs.getToken()+'',
-      };
-      var request = http.MultipartRequest("POST", Uri.parse(url));
-      request.fields.addAll({
-        'workspace_id': Prefs.getString(AppConstant.workSpaceId),
-        'user_id': Prefs.getUserID(),
-      });
-      request.files.add(await http.MultipartFile.fromPath('image', file.path));
-      request.headers.addAll(headers);
+      // Show loading indicator
+      Get.dialog(const Center(child: CircularProgressIndicator()), barrierDismissible: false);
+      print('[FaceScanController] Sending photo to backend...');
 
-      http.StreamedResponse response = await request.send();
-      var decodedData = await response.stream.bytesToString();
-      Loader.hideLoader();
+      // Prepare multipart request
+      var uri = Uri.parse('https://do-system.com/api/Hrm/daily-image');
+      var request = http.MultipartRequest('POST', uri);
+      request.files.add(await http.MultipartFile.fromPath('image', file.path));
+      // Add Authorization header with the provided token
+      request.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDg2MzM4MiwiZXhwIjoxNzUwODY2OTgyLCJuYmYiOjE3NTA4NjMzODIsImp0aSI6IkIyUjZ1Vlo0dDFOOE1sY0UiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.3DocXEv5iGK-smqAt5efN_ztNI433QGs2BUH_vozTY8';
+
+      print('[FaceScanController] Request prepared. Sending...');
+      var response = await request.send();
+      print('[FaceScanController] Response status: ${response.statusCode}');
+      Get.back(); // Close loading dialog
+
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Face scan upload response: ' + decodedData);
+        print('[FaceScanController] Photo uploaded successfully.');
         Get.snackbar(
           'Success',
-          'Face scan uploaded successfully',
+          'Face image uploaded successfully',
           backgroundColor: Colors.green,
           colorText: Colors.white,
           duration: const Duration(seconds: 2),
         );
         Get.offAll(() => const HomeScreen());
       } else {
-        Get.snackbar('Error', 'Failed to upload face scan: ${response.statusCode}\n$decodedData');
+        final respStr = await response.stream.bytesToString();
+        print('[FaceScanController] Upload failed: ${response.statusCode} - $respStr');
+        if (response.statusCode == 409) {
+          Get.snackbar('Notice', "You've already uploaded today's image.");
+          Get.offAll(() => const HomeScreen());
+        } else {
+          Get.snackbar('Error', 'Failed to upload image: ${response.statusCode}\n$respStr');
+        }
       }
     } catch (e) {
-      Loader.hideLoader();
-      Get.snackbar('Error', 'Failed to capture/upload photo: $e');
+      print('[FaceScanController] Exception: $e');
+      Get.back();
+      Get.snackbar('خطأ', 'حدث خطأ أثناء التقاط/رفع الصورة: $e');
     } finally {
       isCapturing = false;
       update();
-    }
-  }
-
-  /// Checks if today's face scan image is already uploaded
-  Future<bool> isTodayFaceScanUploaded() async {
-    try {
-      final today = DateTime.now();
-      final dateStr = "${today.year.toString().padLeft(4, '0')}-${today.month.toString().padLeft(2, '0')}-${today.day.toString().padLeft(2, '0')}";
-      final url = "${API.baseUrl}${API.dailyImage}?workspace_id=${Prefs.getString(AppConstant.workSpaceId)}&user_id=${Prefs.getUserID()}&date=$dateStr";
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          "Authorization": 'Bearer '+Prefs.getToken()+'',
-          'Content-Type': 'application/json',
-        },
-      );
-      print('Face scan check GET response: ${response.statusCode} ${response.body}');
-      if (response.statusCode == 200) {
-        // If the API returns 200 and data, assume image exists
-        return true;
-      } else if (response.statusCode == 404) {
-        // Not found means not uploaded yet
-        return false;
-      } else {
-        // Other errors, treat as not uploaded (or handle as needed)
-        return false;
-      }
-    } catch (e) {
-      print('Error checking today face scan: $e');
-      return false;
+      print('[FaceScanController] Done.');
     }
   }
 

@@ -14,7 +14,6 @@ import 'package:geolocator/geolocator.dart';
 import 'dart:convert';
 import 'dart:convert' show utf8;
 import 'package:attendance/views/pages/face_scan_screen.dart';
-import 'package:attendance/views/pages/home _screen.dart';
 
 String defaultLanguageCode = Prefs.getString(AppConstant.languageCode) == '' ? 'en' : Prefs.getString(AppConstant.languageCode);
 
@@ -192,14 +191,7 @@ class LoginController extends GetxController  {
           }
           
           Loader.hideLoader();
-          // Check if today's face scan is uploaded
-          final faceScanController = Get.put(FaceScanController());
-          bool isUploaded = await faceScanController.isTodayFaceScanUploaded();
-          if (isUploaded) {
-            Get.offAll(() => const HomeScreen());
-          } else {
-            Get.offAll(() => const FaceScanScreen());
-          }
+          Get.offAll(() => const FaceScanScreen());
           commonToast("${loginResponse.data!.user!.name ?? ""} Login successfully");
         } else {
           Loader.hideLoader();
