@@ -97,7 +97,7 @@ class FaceScanController extends GetxController {
       var request = http.MultipartRequest('POST', uri);
       request.files.add(await http.MultipartFile.fromPath('image', file.path));
       // Add Authorization header with the provided token
-      request.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDg2MzM4MiwiZXhwIjoxNzUwODY2OTgyLCJuYmYiOjE3NTA4NjMzODIsImp0aSI6IkIyUjZ1Vlo0dDFOOE1sY0UiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.3DocXEv5iGK-smqAt5efN_ztNI433QGs2BUH_vozTY8';
+      request.headers['Authorization'] = 'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDk0MDUxNSwiZXhwIjoxNzUwOTQ0MTE1LCJuYmYiOjE3NTA5NDA1MTUsImp0aSI6IjZzQjdpeklETjB4NndtTDkiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.h_1Zd3FQ-QpRjPUX1Yxv95p9pBzNUm4kcL9xLNhMXlc';
 
       print('[FaceScanController] Request prepared. Sending...');
       var response = await request.send();

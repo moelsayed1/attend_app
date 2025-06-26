@@ -20,7 +20,7 @@ import 'package:attendance/utils/prefer.dart';
 class HomeTabContent extends StatelessWidget {
   final HomeController homeController;
 
-  HomeTabContent({Key? key, required this.homeController}) : super(key: key);
+  const HomeTabContent({Key? key, required this.homeController}) : super(key: key);
 
   // Helper method to handle location capture and check-in/out
   Future<void> handleLocationBasedAction(Function({double? latitude, double? longitude}) action) async {
@@ -39,7 +39,7 @@ class HomeTabContent extends StatelessWidget {
       print('Location captured: ${position.latitude}, ${position.longitude}');
       
       // Execute the action with location data
-      action(latitude: position.latitude, longitude: position.longitude);
+      await action(latitude: position.latitude, longitude: position.longitude); // Ensure the action completes before proceeding
       
     } catch (e) {
       print('Error getting location: $e');
@@ -54,6 +54,9 @@ class HomeTabContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
+      // Debug: Print button state
+      print('DEBUG: [UI] Check Out button state - isCheckIn: ${homeController.isCheckIn.value}, attendanceId: ${homeController.attendanceId.value}, button enabled: ${homeController.isCheckIn.value && homeController.attendanceId.value.isNotEmpty}');
+      
       return SingleChildScrollView(
         child: Padding(
           padding: EdgeInsets.symmetric(horizontal: 16, vertical: 20),
@@ -83,17 +86,34 @@ class HomeTabContent extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               verticalSpace(40),
+              // Main Fingerprint Button
               IconButton(
                 iconSize: 100,
                 onPressed: () async {
                   print('DEBUG: Fingerprint pressed. isCheckIn: ' + homeController.isCheckIn.value.toString() + ', attendanceId: ' + homeController.attendanceId.value);
+                  
                   if (!homeController.isCheckIn.value) {
+                    // If not checked in, attempt check-in
                     await handleLocationBasedAction(homeController.recordCheckIn);
-                    await homeController.homeApi();
-                  } else {
+                  } else if (homeController.isCheckIn.value && homeController.attendanceId.value.isNotEmpty) {
+                    // If checked in AND attendanceId is available, attempt check-out
                     await handleLocationBasedAction(homeController.recordCheckOut);
+                  } else {
+                    // This scenario means isCheckIn is true but attendanceId is empty.
+                    // This implies an inconsistent state or that homeApi hasn't fully loaded the attendanceId yet.
+                    // Instead of trying to check out (which will fail without attendanceId),
+                    // we should inform the user or refresh data.
+                    Get.snackbar(
+                      'Information',
+                      'Please wait, synchronizing attendance data or manually refresh.',
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.blueAccent,
+                      colorText: Colors.white,
+                    );
+                    // Optionally, force a homeApi call to refresh state
                     await homeController.homeApi();
                   }
+                  // Do NOT call homeApi() unconditionally here!
                 },
                 icon: assetSvdImageWidget(
                   image: "asset/image/svg_image/ic_fingerprint.svg",
@@ -108,8 +128,10 @@ class HomeTabContent extends StatelessWidget {
                   Expanded(
                     child: CommonButton(
                       title: "Check in",
+                      // Button enabled if NOT checked in OR if checked in but already checked out for the day
                       onPressed: (homeController.isCheckIn.value && !homeController.isCheckOut.value) ? null : () async {
                         await handleLocationBasedAction(homeController.recordCheckIn);
+                        // No need for homeApi() here, recordCheckIn handles its own updates and potentially calls homeApi
                       },
                       buttonColor: AppColor.primaryColor,
                     ),
@@ -118,19 +140,22 @@ class HomeTabContent extends StatelessWidget {
                   Expanded(
                     child: CommonButton(
                       title: "Check Out",
-                      onPressed: (homeController.isCheckIn.value && !homeController.isCheckOut.value && homeController.attendanceId.value.isNotEmpty)
+                      // Button enabled if checked in AND attendanceId is present AND not already checked out
+                      onPressed: (homeController.isCheckIn.value && homeController.attendanceId.value.isNotEmpty && !homeController.isCheckOut.value)
                           ? () async {
-                              print('DEBUG: [Button] Check Out enabled. isCheckIn: ${homeController.isCheckIn.value}, isCheckOut: ${homeController.isCheckOut.value}, attendanceId: ${homeController.attendanceId.value}');
-                              await handleLocationBasedAction(homeController.recordCheckOut);
+                                print('DEBUG: [Button] Check Out pressed. isCheckIn: ${homeController.isCheckIn.value}, isCheckOut: ${homeController.isCheckOut.value}, attendanceId: ${homeController.attendanceId.value}');
+                                homeController.printCurrentState('Check Out Button Pressed');
+                                await handleLocationBasedAction(homeController.recordCheckOut);
+                                // No need for homeApi() here, recordCheckOut handles its own updates and potentially calls homeApi
                             }
-                          : null,
+                          : null, // Disabled if conditions not met
                       buttonColor: AppColor.cRed,
                     ),
                   ),
                 ],
               ),
               verticalSpace(40),
-             
+              
               Align(
                 alignment: Alignment.topLeft,
                 child: Text(
@@ -174,4 +199,4 @@ class HomeTabContent extends StatelessWidget {
       );
     });
   }
-} 
+}
