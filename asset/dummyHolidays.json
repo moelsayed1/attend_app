@@ -1,0 +1,16 @@
+{
+    "data": [
+        {
+            "title": "Eid Adha",
+            "start": "2025-07-01",
+            "end": "2025-07-05"
+        },
+        {
+            "title": "Event",
+            "start": "2025-06-25",
+            "end": "2025-06-25"
+        }
+    ],
+    "status": 200,
+    "message": "Holiday events fetched successfully."
+}

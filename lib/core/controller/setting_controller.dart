@@ -7,7 +7,9 @@ import 'package:attendance/views/pages/login_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-String defaultLanguageCode = Prefs.getString(AppConstant.languageCode) == '' ? 'en' : Prefs.getString(AppConstant.languageCode);
+String defaultLanguageCode = Prefs.getString(AppConstant.languageCode) == ''
+    ? 'en'
+    : Prefs.getString(AppConstant.languageCode);
 
 class SettingController extends GetxController {
   LogoutRepository logoutRepository = LogoutRepository();
@@ -17,7 +19,8 @@ class SettingController extends GetxController {
   RxString email = ''.obs;
   RxBool isRtl = false.obs;
   RxString languageCode = defaultLanguageCode.obs;
-  RxString workSpaceId = Prefs.getString(AppConstant.workSpaceId).toString().obs;
+  RxString workSpaceId =
+      Prefs.getString(AppConstant.workSpaceId).toString().obs;
   RxInt selectedWorkSpaceId = 0.obs;
 
   @override
@@ -69,4 +72,4 @@ class SettingController extends GetxController {
       Loader.hideLoader();
     }
   }
-} 
+}

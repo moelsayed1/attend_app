@@ -16,7 +16,8 @@ class LeaveHistory extends StatefulWidget {
 }
 
 class _LeaveHistoryState extends State<LeaveHistory> {
-  final LeaveRequestController leavesController = Get.put(LeaveRequestController());
+  final LeaveRequestController leavesController =
+      Get.put(LeaveRequestController());
 
   @override
   void initState() {
@@ -32,10 +33,8 @@ class _LeaveHistoryState extends State<LeaveHistory> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.appBackGround,
-
       appBar: AppBar(
         backgroundColor: AppColor.cWhite,
-
         surfaceTintColor: Colors.transparent,
         title: Text(
           "My Leaves",
@@ -57,8 +56,10 @@ class _LeaveHistoryState extends State<LeaveHistory> {
             }
           });
         },
-        child:  Icon(Icons.add,
-        color: AppColor.cWhite,),
+        child: Icon(
+          Icons.add,
+          color: AppColor.cWhite,
+        ),
       ),
       body: SafeArea(
         child: Obx(() {
@@ -66,11 +67,32 @@ class _LeaveHistoryState extends State<LeaveHistory> {
               ? const Center(child: CircularProgressIndicator())
               : leavesController.myLeavesHistory.isEmpty
                   ? Center(
-                      child: Text("Data Not Found",
-                          style: pMedium16.copyWith(color: AppColor.cBlack)))
+                      child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          Icons.event_busy,
+                          size: 80,
+                          color: AppColor.primaryColor.withOpacity(0.7),
+                        ),
+                        verticalSpace(16),
+                        Text(
+                          "No Leave History Found",
+                          style: pMedium16.copyWith(
+                              color: AppColor.cBlack,
+                              fontWeight: FontWeight.w500),
+                        ),
+                        verticalSpace(8),
+                        Text(
+                          "You haven't applied for any leaves yet",
+                          style: pRegular14.copyWith(color: AppColor.cLabel),
+                        ),
+                      ],
+                    ))
                   : ListView.builder(
                       itemBuilder: (context, index) {
-                        final LeaveData leaveData = leavesController.myLeavesHistory[index];
+                        final LeaveData leaveData =
+                            leavesController.myLeavesHistory[index];
 
                         return Padding(
                           padding: const EdgeInsets.fromLTRB(0, 10, 0, 0),
@@ -91,10 +113,13 @@ class _LeaveHistoryState extends State<LeaveHistory> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      Text(leaveData.leaveReason.toString(),
-                                          style: pRegular16.copyWith(color: AppColor.cLabel),
-                                      overflow: TextOverflow.ellipsis,
-                                      maxLines: 2,),
+                                      Text(
+                                        leaveData.leaveReason.toString(),
+                                        style: pRegular16.copyWith(
+                                            color: AppColor.cLabel),
+                                        overflow: TextOverflow.ellipsis,
+                                        maxLines: 2,
+                                      ),
                                       verticalSpace(5),
                                       Text(
                                           "${formattedDate(leaveData.startDate ?? "")} - ${formattedDate(leaveData.endDate ?? "")}",
@@ -104,11 +129,11 @@ class _LeaveHistoryState extends State<LeaveHistory> {
                                   ),
                                 ),
                                 Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 5,horizontal: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 5, horizontal: 12),
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(5),
-                                    color: getStatus(leaveData.status ?? "")
-                                  ),
+                                      borderRadius: BorderRadius.circular(5),
+                                      color: getStatus(leaveData.status ?? "")),
                                   child: Text(
                                     leaveData.status ?? "",
                                     style: pMedium14.copyWith(

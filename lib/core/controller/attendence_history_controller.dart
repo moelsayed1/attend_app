@@ -10,85 +10,86 @@ import 'package:intl/intl.dart';
 class AttendanceHistoryController extends GetxController {
   RxList<AttendanceData> attendanceHistoryList = <AttendanceData>[].obs;
 
-  RxInt currentMonth=0.obs;
-  RxInt currentYear=0.obs;
+  RxInt currentMonth = 0.obs;
+  RxInt currentYear = 0.obs;
 
   RxBool isLoading = false.obs;
   bool _isUsingStaticData = false; // Set to false to enable real API calls
 
-  RxString selectedDateText="".obs;
+  RxString selectedDateText = "".obs;
   var selectedDate = DateTime.now().obs;
   @override
   void onInit() {
     super.onInit();
-    currentMonth.value=DateTime.now().month;
-    currentYear.value=DateTime.now().year;
+    currentMonth.value = DateTime.now().month;
+    currentYear.value = DateTime.now().year;
 
-    selectedDateText.value= getMonthNameFromDate(selectedDate.value)+" "+selectedDate.value.year.toString();
+    selectedDateText.value = getMonthNameFromDate(selectedDate.value) +
+        " " +
+        selectedDate.value.year.toString();
 
     WidgetsBinding.instance.addObserver(AppLifecycleListener());
-
   }
 
-  int getMonth()
-  {
+  int getMonth() {
     DateTime now = DateTime.now();
     return now.month;
   }
 
-   navigateToPreviousMonth() {
+  navigateToPreviousMonth() {
     selectedDate.update((val) {
       if (val!.month == 1) {
         val = DateTime(val.year - 1, 12);
-        selectedDateText.value= getMonthNameFromDate(val)+" "+ val.year.toString();
-        selectedDate.value=val;
+        selectedDateText.value =
+            getMonthNameFromDate(val) + " " + val.year.toString();
+        selectedDate.value = val;
 
-        currentMonth.value=val.month;
-        currentYear.value=val.year;
+        currentMonth.value = val.month;
+        currentYear.value = val.year;
       } else {
         val = DateTime(val.year, val.month - 1);
-        selectedDateText.value= "${getMonthNameFromDate(val)+" "+ val.year.toString()}";
-        selectedDate.value=val;
+        selectedDateText.value =
+            "${getMonthNameFromDate(val) + " " + val.year.toString()}";
+        selectedDate.value = val;
 
-        currentMonth.value=val.month;
-        currentYear.value=val.year;
+        currentMonth.value = val.month;
+        currentYear.value = val.year;
       }
       print(getMonthNameFromDate(val));
     });
-      print("CurrentYear $currentYear");
-      print("CurrentMonth $currentMonth");
-     attendanceHistory(currentMonth.value.toString(),currentYear.value.toString());
+    print("CurrentYear $currentYear");
+    print("CurrentMonth $currentMonth");
+    attendanceHistory(
+        currentMonth.value.toString(), currentYear.value.toString());
+  }
 
-   }
-
-   navigateToNextMonth() {
+  navigateToNextMonth() {
     selectedDate.update((val) {
       if (val!.month == 12) {
         val = DateTime(val.year + 1, 1);
-        selectedDateText.value= getMonthNameFromDate(val)+" "+val.year.toString();
-        selectedDate.value=val;
+        selectedDateText.value =
+            getMonthNameFromDate(val) + " " + val.year.toString();
+        selectedDate.value = val;
 
-        currentMonth.value=val.month;
-        currentYear.value=val.year;
-
+        currentMonth.value = val.month;
+        currentYear.value = val.year;
       } else {
         val = DateTime(val.year, val.month + 1);
-        selectedDateText.value= getMonthNameFromDate(val)+" "+val.year.toString();
-        selectedDate.value=val;
+        selectedDateText.value =
+            getMonthNameFromDate(val) + " " + val.year.toString();
+        selectedDate.value = val;
 
-        currentMonth.value=val.month;
-        currentYear.value=val.year;
-
+        currentMonth.value = val.month;
+        currentYear.value = val.year;
       }
       print(getMonthNameFromDate(val));
-
     });
 
-    attendanceHistory(currentMonth.value.toString(),currentYear.value.toString());
+    attendanceHistory(
+        currentMonth.value.toString(), currentYear.value.toString());
     print("CurrentYear $currentYear");
     print("CurrentMonth $currentMonth");
-
-   }
+  }
 
   @override
   void dispose() {
@@ -98,18 +99,25 @@ class AttendanceHistoryController extends GetxController {
 
   Future<void> attendanceHistory(String month, String year) async {
     try {
-      isLoading.value = true;
-      
+      //   isLoading.value = true;
+
       if (_isUsingStaticData) {
         // Use static data instead of API call
         await Future.delayed(Duration(milliseconds: 500)); // Simulate loading
         isLoading.value = false;
         return;
       }
-      
-      var response = await NetworkHttps.postRequest(API.attendanceHistory,{"workspace_id": Prefs.getString(AppConstant.workSpaceId),"type":"monthly","month":month,"year":year});
-      if (response != null && (response['status'] == 1 || response['status'] == 200)) {
-        AttendanceHistory attendanceHistoryResponse = AttendanceHistory.fromJson(response);
+
+      var response = await NetworkHttps.postRequest(API.attendanceHistory, {
+        "workspace_id": Prefs.getString(AppConstant.workSpaceId),
+        "type": "monthly",
+        "month": month,
+        "year": year
+      });
+      if (response != null &&
+          (response['status'] == 1 || response['status'] == 200)) {
+        AttendanceHistory attendanceHistoryResponse =
+            AttendanceHistory.fromJson(response);
         attendanceHistoryList.assignAll(attendanceHistoryResponse.data!);
       }
       isLoading.value = false;
@@ -127,8 +135,7 @@ class AttendanceHistoryController extends GetxController {
 
   getFormattedDate(String date) {
     final formatter = DateFormat('dd/MMM/yyyy');
-    final formattedDate = formatter.format(DateTime.parse(date??""));
+    final formattedDate = formatter.format(DateTime.parse(date ?? ""));
     return formattedDate;
   }
-
 }

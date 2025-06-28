@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print
 
-
 import 'package:attendance/config/repository/change_password_repository.dart';
 import 'package:attendance/utils/common_snackbar_widget.dart';
 import 'package:attendance/views/pages/login_screen.dart';
@@ -11,7 +10,8 @@ import 'package:get/get.dart';
 import '../../utils/prefer.dart';
 
 class ChangePasswordController extends GetxController {
-  ChangePasswordRepository changePasswordRepository = ChangePasswordRepository();
+  ChangePasswordRepository changePasswordRepository =
+      ChangePasswordRepository();
   TextEditingController oldPassword = TextEditingController();
   TextEditingController newPassword = TextEditingController();
   TextEditingController confirmPassword = TextEditingController();

@@ -10,6 +10,8 @@ class Prefs {
   static const String BASE_URL = 'base_url';
   static const String IS_CHECK_IN = 'is_check_in';
 
+  static const String last_Face_Scan_Time = 'last_face_scan_time';
+
   static GetStorage? get _storage => GetStorage();
 
   static setString(String key, String value) {
@@ -34,6 +36,15 @@ class Prefs {
 
   static setBaseUrl(String baseUrl) {
     return _storage?.write(BASE_URL, baseUrl);
+  }
+
+  static String getLastFaceScanTime() {
+    return _storage?.read(last_Face_Scan_Time) ??
+        DateTime.now().toUtc().subtract(const Duration(days: 1)).toString();
+  }
+
+  static setLastFaceScanTime(String lastFaceScanTime) async {
+    return await _storage?.write(last_Face_Scan_Time, lastFaceScanTime);
   }
 
   static String getToken() {

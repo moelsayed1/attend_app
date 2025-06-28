@@ -1,4 +1,5 @@
 import 'package:attendance/utils/app_color.dart';
+import 'package:attendance/utils/prefer.dart';
 import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_button.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
@@ -16,6 +17,7 @@ class FaceScanScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(FaceScanController());
     final double circleSize = 270.w;
+    Prefs.setLastFaceScanTime(DateTime.now().toUtc().toString());
 
     return Scaffold(
       backgroundColor: AppColor.appBackGround,
@@ -28,7 +30,8 @@ class FaceScanScreen extends StatelessWidget {
             children: [
               Text(
                 'Face Verification ',
-                style: pSemiBold21.copyWith(color: AppColor.cBlack, fontSize: pSemiBold21.fontSize?.sp),
+                style: pSemiBold21.copyWith(
+                    color: AppColor.cBlack, fontSize: pSemiBold21.fontSize?.sp),
               ),
               Text('👋', style: TextStyle(fontSize: 28.sp)),
             ],
@@ -37,7 +40,8 @@ class FaceScanScreen extends StatelessWidget {
         actions: [
           IconButton(
             icon: Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
-            onPressed: controller.cameras.isEmpty ? null : controller.toggleCamera,
+            onPressed:
+                controller.cameras.isEmpty ? null : controller.toggleCamera,
           ),
         ],
       ),
@@ -70,16 +74,19 @@ class FaceScanScreen extends StatelessWidget {
                                     width: 2.0.w,
                                   ),
                                 ),
-                                child: const Center(child: CircularProgressIndicator()),
+                                child: const Center(
+                                    child: CircularProgressIndicator()),
                               );
                             }
-                            
+
                             return FutureBuilder<void>(
                               future: controller.initializeControllerFuture,
                               builder: (context, snapshot) {
-                                if (snapshot.connectionState == ConnectionState.done) {
+                                if (snapshot.connectionState ==
+                                    ConnectionState.done) {
                                   if (controller.controller != null &&
-                                      controller.controller!.value.isInitialized) {
+                                      controller
+                                          .controller!.value.isInitialized) {
                                     try {
                                       return ClipOval(
                                         child: SizedBox(
@@ -89,8 +96,11 @@ class FaceScanScreen extends StatelessWidget {
                                             scale: 1.5,
                                             child: Center(
                                               child: AspectRatio(
-                                                aspectRatio: 1 / controller.controller!.value.aspectRatio,
-                                                child: CameraPreview(controller.controller!),
+                                                aspectRatio: 1 /
+                                                    controller.controller!.value
+                                                        .aspectRatio,
+                                                child: CameraPreview(
+                                                    controller.controller!),
                                               ),
                                             ),
                                           ),
@@ -109,7 +119,11 @@ class FaceScanScreen extends StatelessWidget {
                                             width: 2.0.w,
                                           ),
                                         ),
-                                        child: Center(child: Text('Camera Error', style: TextStyle(fontSize: 14.sp, color: AppColor.cRed))),
+                                        child: Center(
+                                            child: Text('Camera Error',
+                                                style: TextStyle(
+                                                    fontSize: 14.sp,
+                                                    color: AppColor.cRed))),
                                       );
                                     }
                                   } else {
@@ -124,15 +138,21 @@ class FaceScanScreen extends StatelessWidget {
                                           width: 2.0.w,
                                         ),
                                       ),
-                                      child: Center(child: Text('Camera Error', style: TextStyle(fontSize: 14.sp))),
+                                      child: Center(
+                                          child: Text('Camera Error',
+                                              style:
+                                                  TextStyle(fontSize: 14.sp))),
                                     );
                                   }
-                                } else if (snapshot.connectionState == ConnectionState.waiting) {
+                                } else if (snapshot.connectionState ==
+                                    ConnectionState.waiting) {
                                   // Add a fallback timeout for loading
                                   return FutureBuilder(
-                                    future: Future.delayed(const Duration(seconds: 10)),
+                                    future: Future.delayed(
+                                        const Duration(seconds: 10)),
                                     builder: (context, timeoutSnapshot) {
-                                      if (timeoutSnapshot.connectionState == ConnectionState.done) {
+                                      if (timeoutSnapshot.connectionState ==
+                                          ConnectionState.done) {
                                         return Container(
                                           width: circleSize,
                                           height: circleSize,
@@ -147,7 +167,9 @@ class FaceScanScreen extends StatelessWidget {
                                           child: Center(
                                             child: Text(
                                               'Camera is taking too long to load.\nPlease check permissions or restart the app.',
-                                              style: TextStyle(color: AppColor.cRed, fontSize: 14.sp),
+                                              style: TextStyle(
+                                                  color: AppColor.cRed,
+                                                  fontSize: 14.sp),
                                               textAlign: TextAlign.center,
                                             ),
                                           ),
@@ -164,7 +186,9 @@ class FaceScanScreen extends StatelessWidget {
                                               width: 2.0.w,
                                             ),
                                           ),
-                                          child: const Center(child: CircularProgressIndicator()),
+                                          child: const Center(
+                                              child:
+                                                  CircularProgressIndicator()),
                                         );
                                       }
                                     },
@@ -181,7 +205,8 @@ class FaceScanScreen extends StatelessWidget {
                                         width: 2.0.w,
                                       ),
                                     ),
-                                    child: const Center(child: CircularProgressIndicator()),
+                                    child: const Center(
+                                        child: CircularProgressIndicator()),
                                   );
                                 }
                               },

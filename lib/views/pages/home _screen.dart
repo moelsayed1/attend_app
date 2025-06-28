@@ -33,25 +33,31 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  final HomeController homeController = Get.put(HomeController(), permanent: true);
+  final HomeController homeController =
+      Get.put(HomeController(), permanent: true);
   int _selectedIndex = 0;
 
   final List<BottomNavItem> _bottomNavItems = [
     BottomNavItem(iconPath: "asset/image/svg_image/ic_home.svg", label: 'Home'),
-    BottomNavItem(iconPath: "asset/image/svg_image/calendar-tick.svg", label: 'Leaves'),
-    BottomNavItem(iconPath: "asset/image/svg_image/ic_attendance_history.svg", label: 'Attendance'),
-    BottomNavItem(iconPath: "asset/image/svg_image/calendar.svg", label: 'Holidays'),
-    BottomNavItem(iconPath: "asset/image/svg_image/ic_settings.svg", label: 'Setting'),
+    BottomNavItem(
+        iconPath: "asset/image/svg_image/calendar-tick.svg", label: 'Leaves'),
+    BottomNavItem(
+        iconPath: "asset/image/svg_image/ic_attendance_history.svg",
+        label: 'Attendance'),
+    BottomNavItem(
+        iconPath: "asset/image/svg_image/calendar.svg", label: 'Holidays'),
+    BottomNavItem(
+        iconPath: "asset/image/svg_image/ic_settings.svg", label: 'Setting'),
   ];
 
   // List of screens for the bottom navigation bar
   List<Widget> get _screens => [
-    HomeTabContent(homeController: homeController), // Pass homeController
-    const LeaveHistory(), // Leaves tab
-    const AttendanceHistory(), // Attendance tab
-    const HolidayList(),
-    const SettingScreen(), // Setting tab
-  ];
+        HomeTabContent(homeController: homeController), // Pass homeController
+        const LeaveHistory(), // Leaves tab
+        const AttendanceHistory(), // Attendance tab
+        const HolidayList(),
+        const SettingScreen(), // Setting tab
+      ];
 
   // List of titles for each tab
   final List<String> _titles = [
@@ -63,13 +69,14 @@ class _HomeScreenState extends State<HomeScreen> {
   ];
 
   void _onItemTapped(int index) {
-    if (_selectedIndex == index) return; // Don't do anything if same tab is tapped
+    if (_selectedIndex == index)
+      return; // Don't do anything if same tab is tapped
     setState(() {
       _selectedIndex = index;
     });
     homeController.pageController.animateToPage(
       index,
-      duration: const Duration(milliseconds: 300), // Animation duration
+      duration: const Duration(milliseconds: 30), // Animation duration
       curve: Curves.easeOut, // Animation curve
     );
   }
@@ -80,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     homeController.announcementList.clear();
     // Initialize all controllers at once to prevent token validation on tab switch
     //Get.put(LeaveRequestController(), permanent: true);
-   // Get.put(AttendanceHistoryController(), permanent: true);
+    // Get.put(AttendanceHistoryController(), permanent: true);
     //Get.put(EventController(), permanent: true);
     WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
       // homeController.homeApi();
@@ -98,12 +105,14 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColor.appBackGround,
-      appBar: _selectedIndex == 0 ? AppBar(
-        backgroundColor: AppColor.cWhite,
-        surfaceTintColor: Colors.transparent,
-        title: Text("Dashboard", style: pSemiBold21),
-        centerTitle: true,
-      ) : null,
+      appBar: _selectedIndex == 0
+          ? AppBar(
+              backgroundColor: AppColor.cWhite,
+              surfaceTintColor: Colors.transparent,
+              title: Text("Dashboard", style: pSemiBold21),
+              centerTitle: true,
+            )
+          : null,
       body: PageView(
         controller: homeController.pageController,
         onPageChanged: (index) {

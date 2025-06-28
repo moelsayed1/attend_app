@@ -86,6 +86,9 @@ flutter:
   assets:
     - asset/image/svg_image/
     - asset/image/png_images/
+    - asset/dummyMettings.json
+    - asset/dummyHolidays.json
+    - asset/dummyLeaveTypes.json
     - asset/.env
   #   - images/a_dot_burr.jpeg
   #   - images/a_dot_ham.jpeg
