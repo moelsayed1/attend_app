@@ -1,26 +1,16 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:attendance/core/controller/home_controller.dart';
-import 'package:attendance/core/controller/leave_request_controller.dart';
-import 'package:attendance/core/controller/attendence_history_controller.dart';
-import 'package:attendance/core/controller/event_controller.dart';
 //import 'package:attendance/core/model/meeting_model.dart';
 import 'package:attendance/utils/app_color.dart';
-import 'package:attendance/utils/image_path.dart';
 import 'package:attendance/utils/ui_text_style.dart';
-import 'package:attendance/views/widgets/common_space_divider_widget.dart';
-import 'package:attendance/views/widgets/icon_and_image.dart';
-import 'package:attendance/views/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:attendance/views/widgets/custom_animated_bottom_bar.dart';
-import 'package:geolocator/geolocator.dart';
 
 // Import your other screens here
 import 'package:attendance/views/pages/leave_history.dart';
 import 'package:attendance/views/pages/attendance_history.dart';
-import 'package:attendance/views/pages/event_calender.dart';
 import 'package:attendance/views/pages/setting_screen.dart';
 import 'package:attendance/views/pages/holiday_list.dart';
 import 'package:attendance/views/pages/home_tab_content.dart'; // Import the new file

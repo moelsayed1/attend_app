@@ -1,6 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:attendance/core/controller/leave_request_controller.dart';
+import 'package:attendance/core/model/leave_history_response.dart';
 import 'package:attendance/core/model/leave_types_response.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/common_snackbar_widget.dart';
@@ -12,8 +13,8 @@ import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
+// ignore: must_be_immutable
 class LeaveRequestScreen extends StatelessWidget {
   LeaveRequestScreen({super.key});
   TextEditingController reasonController = TextEditingController();
@@ -244,7 +245,6 @@ class LeaveRequestScreen extends StatelessWidget {
                         child: CommonButton(
                             title: "Apply",
                             onPressed: () {
-
                               print("date${requestController.getParameterFormattedDate(requestController.startDate.value)}");
                               print("enddate${requestController.getParameterFormattedDate(requestController.startDate.value)}");
 
@@ -255,9 +255,22 @@ class LeaveRequestScreen extends StatelessWidget {
                               } else if (remarkController.text.isEmpty) {
                                 commonToast("Leave remark field is required");
                               } else {
+                                // Create leave data object
+                                final leaveData = LeaveData(
+                                  leaveReason: reasonController.text,
+                                  startDate: requestController.getParameterFormattedDate(requestController.startDate.value),
+                                  endDate: requestController.getParameterFormattedDate(requestController.endDate.value),
+                                  leaveTypeId: int.parse(requestController.leaveId.value),
+                                  status: "Pending"
+                                );
+
+                                // Add to history list
+                                requestController.myLeavesHistory.add(leaveData);
+                                
+                                // Make API request
                                 requestController.leaveRequest({
                                   "leave_reason": reasonController.text,
-                                  "start_date": requestController.getParameterFormattedDate(requestController.startDate.value),
+                                  "start_date": requestController.getParameterFormattedDate(requestController.startDate.value), 
                                   "end_date": requestController.getParameterFormattedDate(requestController.endDate.value),
                                   "remark": remarkController.text,
                                   "user_id": Prefs.getUserID(),

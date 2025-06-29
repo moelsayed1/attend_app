@@ -47,11 +47,12 @@ class FaceScanScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon:
-                      Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
-                  onPressed: controller.cameras.isEmpty
-                      ? null
-                      : controller.toggleCamera,
+                  icon: Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
+                  onPressed: () {
+                    if (controller.cameras.length > 1) {
+                      controller.toggleCamera();
+                    }
+                  },
                 ),
               ],
             ),

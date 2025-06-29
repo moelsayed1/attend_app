@@ -16,6 +16,16 @@ class MyLeavesResponse {
     }
   }
 
+  // Constructor for API response that only has data array
+  MyLeavesResponse.fromDataArray(List<dynamic> dataArray) {
+    status = 1; // Default success status
+    message = "Success";
+    data = <LeaveData>[];
+    dataArray.forEach((v) {
+      data!.add(LeaveData.fromJson(v));
+    });
+  }
+
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = <String, dynamic>{};
     data['status'] = status;
@@ -32,6 +42,7 @@ class LeaveData {
   int? employeeId;
   int? userId;
   int? leaveTypeId;
+  String? leaveTypeName;
   String? appliedOn;
   String? startDate;
   String? endDate;
@@ -47,6 +58,7 @@ class LeaveData {
         this.employeeId,
         this.userId,
         this.leaveTypeId,
+        this.leaveTypeName,
         this.appliedOn,
         this.startDate,
         this.endDate,
@@ -62,6 +74,7 @@ class LeaveData {
     employeeId = json['employee_id'];
     userId = json['user_id'];
     leaveTypeId = json['leave_type_id'];
+    leaveTypeName = json['leave_type_name'];
     appliedOn = json['applied_on'];
     startDate = json['start_date'];
     endDate = json['end_date'];
@@ -79,6 +92,7 @@ class LeaveData {
     data['employee_id'] = employeeId;
     data['user_id'] = userId;
     data['leave_type_id'] = leaveTypeId;
+    data['leave_type_name'] = leaveTypeName;
     data['applied_on'] = appliedOn;
     data['start_date'] = startDate;
     data['end_date'] = endDate;

@@ -265,17 +265,16 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
       //   Fetch meetings from real API
       try {
-        var meetingsResponse = await rootBundle
-            .loadString('asset/dummyMettings.json')
-            .then((jsonStr) => jsonDecode(jsonStr));
+        // var meetingsResponse = await rootBundle
+        //     .loadString('asset/dummyMettings.json')
+        //     .then((jsonStr) => jsonDecode(jsonStr));
 
-        // var meetingsResponse = await NetworkHttps.getRequest(API.eventCalender);
+         var meetingsResponse = await NetworkHttps.getRequest(API.eventCalender);
         teamMeetings.clear();
         if (meetingsResponse['status'] == 405) {
           return;
         }
-        if (meetingsResponse != null &&
-            meetingsResponse['status'] == 200 &&
+        if (meetingsResponse['status'] == 200 &&
             meetingsResponse['data'] != null) {
           for (var meeting in meetingsResponse['data']) {
             teamMeetings.add({

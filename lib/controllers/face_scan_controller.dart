@@ -65,10 +65,39 @@ class FaceScanController extends GetxController {
     update();
   }
 
-  void toggleCamera() {
-    selectedCameraIndex =
-        selectedCameraIndex < cameras.length - 1 ? selectedCameraIndex + 1 : 0;
-    initializeCamera(cameras[selectedCameraIndex]);
+  Future<void> toggleCamera() async {
+    try {
+      // Dispose current camera controller before switching
+      if (controller != null) {
+        await controller!.dispose();
+      }
+
+      // Toggle camera index safely
+      if (cameras.isNotEmpty) {
+        selectedCameraIndex = 
+            selectedCameraIndex < cameras.length - 1 ? selectedCameraIndex + 1 : 0;
+        
+        // Initialize new camera
+        await initializeCamera(cameras[selectedCameraIndex]);
+        update(); // Update UI
+      } else {
+        print('No cameras available');
+        Get.snackbar(
+          'Error',
+          'No cameras available to switch to',
+          backgroundColor: Colors.red,
+          colorText: Colors.white
+        );
+      }
+    } catch (e) {
+      print('Error toggling camera: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to switch camera',
+        backgroundColor: Colors.red,
+        colorText: Colors.white
+      );
+    }
   }
 
   Future<void> captureAndSendPhoto() async {

@@ -7,6 +7,7 @@ import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:attendance/network_dio/network_dio.dart';
 import 'package:attendance/utils/base_api.dart';
 import 'package:attendance/utils/prefer.dart';
+import 'package:attendance/views/pages/leave_history.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -28,25 +29,7 @@ class LeaveRequestController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    isLoading.value = true; // Set loading to true at the start of init
-
-    getLeaveTypes();
-    getMyLeaves();
-  }
-
-  void _loadStaticLeaveTypes() {
-    leaveTypes.clear();
-    leaveTypes.addAll([
-      LeaveType(id: 1, title: "Annual Leave", isDisable: 0),
-      LeaveType(id: 2, title: "Sick Leave", isDisable: 0),
-      LeaveType(id: 3, title: "Casual Leave", isDisable: 0),
-      LeaveType(id: 4, title: "Maternity Leave", isDisable: 0),
-      LeaveType(id: 5, title: "Paternity Leave", isDisable: 0),
-    ]);
-    if (leaveTypes.isNotEmpty) {
-      leaveType.value = leaveTypes.first.title.toString();
-      leaveId.value = leaveTypes.first.id.toString();
-    }
+    // Controller initialization only - no data loading here
   }
 
   Future<void> selectStartDate(BuildContext context) async {
@@ -88,19 +71,53 @@ class LeaveRequestController extends GetxController {
     return formattedDate;
   }
 
-  getMyLeaves() async {
-    var response = await NetworkHttps.postRequest(API.getLeaves,
-        {"workspace_id": Prefs.getString(AppConstant.workSpaceId)});
+  Future<void> getMyLeaves() async {
+    // Set loading state before any UI updates
+    isLoading.value = true;
 
-    if (response["status"] == 1) {
-      myLeavesResponse = MyLeavesResponse.fromJson(response);
+    try {
+      // Make API request
+      final response = await NetworkHttps.postRequest(
+        API.getLeaves,
+        {"workspace_id": Prefs.getString(AppConstant.workSpaceId)}
+      );
 
-      myLeavesHistory.addAll(myLeavesResponse!.data!);
-      myLeavesHistory.refresh();
-    } else {
-      commonToast(response["message"]);
+      print("Debug - API Response: $response");
+
+      // Process response outside of build context
+      if (response.containsKey("status")) {
+        if (response["status"] == 1 || response["status"] == 200) {
+          myLeavesResponse = MyLeavesResponse.fromJson(response);
+        } else {
+          print("API Error: ${response['status']}");
+          Get.snackbar('Error', response["message"] ?? 'Unknown error');
+          return;
+        }
+      } else if (response.containsKey("data")) {
+        myLeavesResponse = MyLeavesResponse.fromDataArray(response["data"]);
+      } else {
+        print("Invalid response format");
+        Get.snackbar('Error', 'Invalid response format');
+        return;
+      }
+
+      // Update observable list safely
+      if (myLeavesResponse?.data != null) {
+        myLeavesHistory.clear();
+        myLeavesHistory.addAll(myLeavesResponse!.data!);
+        print("Debug - Loaded ${myLeavesHistory.length} leaves successfully");
+      } else {
+        myLeavesHistory.clear();
+        print("Debug - No leaves found");
+      }
+
+    } catch (e) {
+      print("Error in getMyLeaves: $e");
+      Get.snackbar('Error', 'Failed to load leave history');
+      myLeavesHistory.clear();
+    } finally {
+      isLoading.value = false;
     }
-    // If using static data, ensure isLoading is set to false after loading.
   }
 
   leaveRequest(Map map) async {
@@ -111,7 +128,12 @@ class LeaveRequestController extends GetxController {
       Loader.hideLoader();
 
       commonToast(response["message"]);
-      Get.back(result: true);
+      
+      // Refresh the leave history data first
+      await getMyLeaves();
+      
+      // Navigate to leave history page using the same controller instance
+      Get.offAll(() => const LeaveHistory());
     } else {
       Loader.hideLoader();
       commonToast(response["message"]);
@@ -119,16 +141,11 @@ class LeaveRequestController extends GetxController {
   }
 
   getLeaveTypes() async {
-    isLoading.value = true;
     try {
-      // var response = await NetworkHttps.postRequest(API.getLeavesTypes,
-      //     {"workspace_id": Prefs.getString(AppConstant.workSpaceId)});
+      var response = await NetworkHttps.postRequest(API.getLeavesTypes,
+          {"workspace_id": Prefs.getString(AppConstant.workSpaceId)});
 
-      var response1 = await rootBundle.loadString('asset/dummyLeaveTypes.json');
-      var response = jsonDecode(response1);
-
-      if (response != null &&
-          (response["status"] == 1 || response["status"] == 200)) {
+      if ((response["status"] == 1 || response["status"] == 200)) {
         leaveTypeResponse = LeaveTypesResponse.fromJson(response);
         leaveTypes.clear();
 
@@ -144,12 +161,10 @@ class LeaveRequestController extends GetxController {
           leaveTypes.refresh();
         }
       } else {
-        commonToast(response?["message"] ?? "Failed to load leave types");
+        commonToast(response["message"] ?? "Failed to load leave types");
       }
     } catch (e) {
       commonToast("Error loading leave types: $e");
-    } finally {
-      isLoading.value = false;
     }
   }
 }
