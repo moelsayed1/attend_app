@@ -1,5 +1,7 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:developer';
+
 import 'package:attendance/core/controller/home_controller.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/image_path.dart';
@@ -9,13 +11,10 @@ import 'package:attendance/views/widgets/icon_and_image.dart';
 import 'package:attendance/views/widgets/common_button.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 import 'package:attendance/views/widgets/attendance_row_widget.dart';
 import 'package:attendance/views/widgets/team_meetings_section.dart';
-import 'package:attendance/views/widgets/announcements_section.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:attendance/utils/location_helper.dart';
-import 'package:attendance/utils/prefer.dart';
 
 class HomeTabContent extends StatelessWidget {
   final HomeController homeController;
@@ -38,7 +37,7 @@ class HomeTabContent extends StatelessWidget {
         return;
       }
 
-      print('Location captured: ${position.latitude}, ${position.longitude}');
+      log('Location captured: ${position.latitude}, ${position.longitude}');
 
       // Execute the action with location data
       await action(
@@ -46,7 +45,7 @@ class HomeTabContent extends StatelessWidget {
           longitude: position
               .longitude); // Ensure the action completes before proceeding
     } catch (e) {
-      print('Error getting location: $e');
+      log('Error getting location: $e');
       Get.snackbar(
         'Error',
         'Failed to get location. Please try again.',
@@ -90,10 +89,10 @@ class HomeTabContent extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              verticalSpace(40),
+              verticalSpace(32),
               // Main Fingerprint Button
               IconButton(
-                iconSize: 100,
+                iconSize: 80,
                 onPressed: () async {
                   print('DEBUG: Fingerprint pressed. isCheckIn: ' +
                       homeController.isCheckIn.value.toString() +
@@ -174,7 +173,7 @@ class HomeTabContent extends StatelessWidget {
                   ),
                 ],
               ),
-              verticalSpace(40),
+              verticalSpace(32),
 
               Align(
                 alignment: Alignment.topLeft,
@@ -211,11 +210,11 @@ class HomeTabContent extends StatelessWidget {
                   ],
                 ),
               ),
-              verticalSpace(30),
+              verticalSpace(28),
               if (homeController.teamMeetings.isNotEmpty)
                 TeamMeetingsSection(homeController: homeController),
-              verticalSpace(30),
-              AnnouncementsSection(homeController: homeController),
+              // verticalSpace(30),
+              // AnnouncementsSection(homeController: homeController),
             ],
           ),
         ),

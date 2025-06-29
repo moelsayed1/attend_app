@@ -26,11 +26,7 @@ class LeaveRequestController extends GetxController {
   RxString leaveType = ''.obs;
   RxString leaveId = ''.obs;
 
-  @override
-  void onInit() {
-    super.onInit();
-    // Controller initialization only - no data loading here
-  }
+
 
   Future<void> selectStartDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -104,8 +100,28 @@ class LeaveRequestController extends GetxController {
       // Update observable list safely
       if (myLeavesResponse?.data != null) {
         myLeavesHistory.clear();
-        myLeavesHistory.addAll(myLeavesResponse!.data!);
-        print("Debug - Loaded ${myLeavesHistory.length} leaves successfully");
+        
+        // Sort the data by appliedOn field in descending order (newest first)
+        List<LeaveData> sortedData = List.from(myLeavesResponse!.data!);
+        sortedData.sort((a, b) {
+          // Handle null values
+          if (a.appliedOn == null && b.appliedOn == null) return 0;
+          if (a.appliedOn == null) return 1; // null values go to the end
+          if (b.appliedOn == null) return -1;
+          
+          // Parse dates and compare in descending order (newest first)
+          try {
+            DateTime dateA = DateTime.parse(a.appliedOn!);
+            DateTime dateB = DateTime.parse(b.appliedOn!);
+            return dateB.compareTo(dateA); // Descending order
+          } catch (e) {
+            // If date parsing fails, fall back to string comparison
+            return b.appliedOn!.compareTo(a.appliedOn!);
+          }
+        });
+        
+        myLeavesHistory.addAll(sortedData);
+        print("Debug - Loaded ${myLeavesHistory.length} leaves successfully (sorted by newest first)");
       } else {
         myLeavesHistory.clear();
         print("Debug - No leaves found");

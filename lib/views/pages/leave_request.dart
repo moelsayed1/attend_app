@@ -244,7 +244,7 @@ class LeaveRequestScreen extends StatelessWidget {
                       Expanded(
                         child: CommonButton(
                             title: "Apply",
-                            onPressed: () {
+                            onPressed: () async {
                               print("date${requestController.getParameterFormattedDate(requestController.startDate.value)}");
                               print("enddate${requestController.getParameterFormattedDate(requestController.startDate.value)}");
 
@@ -255,20 +255,8 @@ class LeaveRequestScreen extends StatelessWidget {
                               } else if (remarkController.text.isEmpty) {
                                 commonToast("Leave remark field is required");
                               } else {
-                                // Create leave data object
-                                final leaveData = LeaveData(
-                                  leaveReason: reasonController.text,
-                                  startDate: requestController.getParameterFormattedDate(requestController.startDate.value),
-                                  endDate: requestController.getParameterFormattedDate(requestController.endDate.value),
-                                  leaveTypeId: int.parse(requestController.leaveId.value),
-                                  status: "Pending"
-                                );
-
-                                // Add to history list
-                                requestController.myLeavesHistory.add(leaveData);
-                                
-                                // Make API request
-                                requestController.leaveRequest({
+                                // Make API request - the controller will handle navigation
+                                await requestController.leaveRequest({
                                   "leave_reason": reasonController.text,
                                   "start_date": requestController.getParameterFormattedDate(requestController.startDate.value), 
                                   "end_date": requestController.getParameterFormattedDate(requestController.endDate.value),
@@ -277,6 +265,7 @@ class LeaveRequestScreen extends StatelessWidget {
                                   "leave_type_id": requestController.leaveId.value,
                                 });
                               }
+                              Get.back();
                             }),
                       ),
                       horizontalSpace(10),

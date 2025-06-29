@@ -152,16 +152,20 @@ class ChangePasswordScreen extends StatelessWidget {
                     verticalSpace(35),
                     CommonButton(
                       title: 'Save change',
-                      onPressed: () {
+                      onPressed: () async {
                         if (Prefs.getBool(AppConstant.isDemoMode) == true) {
                           commonToast(AppConstant.demoString);
                         } else {
                           if (formKey.currentState!.validate()) {
-                            changePasswordController.changePassword(
-                                oldPassword: changePasswordController.oldPassword.text.trim(),
-                                newPassword: changePasswordController.newPassword.text.trim(),
-                                confirmPassword: changePasswordController.confirmPassword.text.trim());
-                          }
+                            await changePasswordController.changePassword(
+                              oldPassword: changePasswordController.oldPassword.text.trim(),
+                              newPassword: changePasswordController.newPassword.text.trim(), 
+                              confirmPassword: changePasswordController.confirmPassword.text.trim()
+                            );
+                            
+                            commonToast('Password changed successfully');
+                            Get.back();
+                                                    }
                         }
                       },
                     )
