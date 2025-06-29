@@ -5,12 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-import 'package:logger/logger.dart';
+
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:attendance/views/widgets/splash_screen.dart';
 
 GetStorage? getStorage;
-var logger = Logger();
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -44,14 +43,6 @@ class _MyAppState extends State<MyApp> {
         Prefs.getString(AppConstant.languageCode) == 'ar' ? 'AR' : 'US';
     Locale locale = Locale(languageCode, countryCode);
 
-    // getToken() async {
-    //   await dotenv.load(fileName: "asset/.env");
-    //   String isDemoMode = dotenv.get(AppConstant.isDemoMode);
-    //   Prefs.setBool(AppConstant.isDemoMode, bool.parse(isDemoMode));
-    //   String accessToken = Prefs.getToken();
-    //   return accessToken;
-    // }
-
     return ScreenUtilInit(
       designSize: const Size(360, 690), // Set your design size here
       minTextAdapt: true,
@@ -61,7 +52,8 @@ class _MyAppState extends State<MyApp> {
           debugShowCheckedModeBanner: false,
           title: 'Nassar Attend',
           theme: ThemeData(
-              colorScheme: ColorScheme.fromSeed(seedColor: AppColor.primaryColor),
+              colorScheme:
+                  ColorScheme.fromSeed(seedColor: AppColor.primaryColor),
               fontFamily: "Outfit",
               useMaterial3: true,
               dialogTheme: DialogThemeData(backgroundColor: AppColor.cWhite)),

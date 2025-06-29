@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:attendance/core/model/home_response.dart';
 import 'package:attendance/network_dio/network_dio.dart';
@@ -8,6 +9,7 @@ import 'package:attendance/utils/common_snackbar_widget.dart';
 import 'package:attendance/utils/prefer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:attendance/utils/app_color.dart';
@@ -263,11 +265,11 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
       //   Fetch meetings from real API
       try {
-        // var meetingsResponse = await rootBundle
-        //     .loadString('asset/dummyMettings.json')
-        //     .then((jsonStr) => jsonDecode(jsonStr));
+        var meetingsResponse = await rootBundle
+            .loadString('asset/dummyMettings.json')
+            .then((jsonStr) => jsonDecode(jsonStr));
 
-        var meetingsResponse = await NetworkHttps.getRequest(API.eventCalender);
+        // var meetingsResponse = await NetworkHttps.getRequest(API.eventCalender);
         teamMeetings.clear();
         if (meetingsResponse['status'] == 405) {
           return;
@@ -504,13 +506,15 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   // Debug method to print current state
   void printCurrentState(String context) {
-    print('DEBUG: [$context] Current State:');
-    print('  - isCheckIn: ${isCheckIn.value}');
-    print('  - isCheckOut: ${isCheckOut.value}');
-    print('  - attendanceId: ${attendanceId.value}');
-    print('  - checkInTime: ${checkInTime.value}');
-    print('  - checkOutTime: ${checkOutTime.value}');
-    print('  - totalHours: ${totalHours.value}');
+    if (kDebugMode) {
+      print('DEBUG: [$context] Current State:');
+      print('  - isCheckIn: ${isCheckIn.value}');
+      print('  - isCheckOut: ${isCheckOut.value}');
+      print('  - attendanceId: ${attendanceId.value}');
+      print('  - checkInTime: ${checkInTime.value}');
+      print('  - checkOutTime: ${checkOutTime.value}');
+      print('  - totalHours: ${totalHours.value}');
+    }
   }
 
   // Test method for debugging checkout

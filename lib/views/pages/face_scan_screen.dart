@@ -1,4 +1,5 @@
 import 'package:attendance/utils/app_color.dart';
+import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/prefer.dart';
 import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_button.dart';
@@ -16,7 +17,7 @@ class FaceScanScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(FaceScanController());
-    final double circleSize = 270.w;
+    final double circleSize = 250.w;
     Prefs.setLastFaceScanTime(DateTime.now().toUtc().toString());
 
     return Scaffold(
@@ -24,26 +25,38 @@ class FaceScanScreen extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: AppColor.appBackGround,
         elevation: 0,
-        title: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 10.w),
-          child: Row(
-            children: [
-              Text(
-                'Face Verification ',
-                style: pSemiBold21.copyWith(
-                    color: AppColor.cBlack, fontSize: pSemiBold21.fontSize?.sp),
-              ),
-              Text('👋', style: TextStyle(fontSize: 28.sp)),
-            ],
-          ),
+        title: Column(
+          children: [
+            SizedBox(height: 20.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Padding(
+                  padding:
+                      EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+                  child: Row(
+                    children: [
+                      Text(
+                        'Hello, ${Prefs.getString(AppConstant.userName).split(' ')[0]} ',
+                        style: pSemiBold21.copyWith(
+                            color: AppColor.cBlack,
+                            fontSize: pSemiBold21.fontSize?.sp),
+                      ),
+                      Text('👋', style: TextStyle(fontSize: 28.sp)),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon:
+                      Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
+                  onPressed: controller.cameras.isEmpty
+                      ? null
+                      : controller.toggleCamera,
+                ),
+              ],
+            ),
+          ],
         ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
-            onPressed:
-                controller.cameras.isEmpty ? null : controller.toggleCamera,
-          ),
-        ],
       ),
       body: SafeArea(
         child: Padding(
@@ -51,7 +64,7 @@ class FaceScanScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              verticalSpace(0.h),
+              verticalSpace(20.h),
               Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
