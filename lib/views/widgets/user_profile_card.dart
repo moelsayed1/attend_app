@@ -7,12 +7,12 @@ import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class UserProfileCard extends StatelessWidget {
   final SettingController settingController;
 
-  const UserProfileCard({Key? key, required this.settingController}) : super(key: key);
+  const UserProfileCard({Key? key, required this.settingController})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -49,8 +49,10 @@ class UserProfileCard extends StatelessWidget {
                   ? CachedNetworkImage(
                       imageUrl: settingController.profileImage.value,
                       fit: BoxFit.cover,
-                      placeholder: (context, url) => const CircularProgressIndicator(),
-                      errorWidget: (context, url, error) => Image.asset(ImagePath.placeholder, fit: BoxFit.cover),
+                      placeholder: (context, url) =>
+                          const CircularProgressIndicator(),
+                      errorWidget: (context, url, error) =>
+                          Image.asset(ImagePath.placeholder, fit: BoxFit.cover),
                     )
                   : Image.asset(ImagePath.placeholder, fit: BoxFit.cover),
             ),
@@ -62,7 +64,7 @@ class UserProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  settingController.name.value.isEmpty 
+                  settingController.name.value.isEmpty
                       ? "Mostafa"
                       : settingController.name.value,
                   style: pSemiBold18.copyWith(color: AppColor.cBlack),
@@ -70,7 +72,7 @@ class UserProfileCard extends StatelessWidget {
                 ),
                 verticalSpace(4),
                 Text(
-                  settingController.email.value.isEmpty 
+                  settingController.email.value.isEmpty
                       ? "Mostafa@example.com"
                       : settingController.email.value,
                   style: pRegular12.copyWith(color: AppColor.textColor),
@@ -83,4 +85,4 @@ class UserProfileCard extends StatelessWidget {
       ),
     );
   }
-} 
+}

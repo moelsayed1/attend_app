@@ -4,6 +4,7 @@ import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer';
 import 'common_space_divider_widget.dart';
 
 class AuthTextField extends StatefulWidget {
@@ -68,7 +69,7 @@ class _AuthTextFieldState extends State<AuthTextField> {
   }
 
   void _onFocusChange() {
-    debugPrint("Focus: ${_focus.hasFocus.toString()}");
+    log("Focus: ${_focus.hasFocus.toString()}");
     setState(() {});
   }
 
@@ -97,12 +98,12 @@ class _AuthTextFieldState extends State<AuthTextField> {
               focusNode: _focus,
               readOnly: widget.readOnly ?? false,
               validator: (v) {
-                print("vv======= $v");
+                log("vv======= $v");
 
                 setState(() {
                   err = widget.validator!(v!);
                 });
-                print("======= $err");
+                log("======= $err");
                 if (err == '') {
                   return null;
                 } else {
@@ -165,7 +166,8 @@ class _AuthTextFieldState extends State<AuthTextField> {
                 ),
                 focusedBorder: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(26),
-                  borderSide: BorderSide(color: AppColor.themeGreenColor, width: 1),
+                  borderSide:
+                      BorderSide(color: AppColor.themeGreenColor, width: 1),
                 ),
               ),
             ),

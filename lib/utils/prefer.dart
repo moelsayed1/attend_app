@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print, constant_identifier_names
+// ignore_for_file: avoid_log, constant_identifier_names
 
 import 'package:get_storage/get_storage.dart';
 

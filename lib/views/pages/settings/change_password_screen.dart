@@ -10,9 +10,8 @@ import 'package:attendance/utils/prefer.dart';
 import 'package:attendance/utils/validator.dart';
 import 'package:attendance/views/widgets/common_button.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
-import 'package:attendance/views/widgets/icon_and_image.dart';
-import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ChangePasswordScreen extends StatelessWidget {
   ChangePasswordScreen({super.key});

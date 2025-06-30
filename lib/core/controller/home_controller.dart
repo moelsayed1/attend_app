@@ -1,19 +1,18 @@
 import 'dart:async';
-import 'dart:convert';
 
+import 'package:attendance/core/controller/attendence_history_controller.dart';
 import 'package:attendance/core/model/home_response.dart';
 import 'package:attendance/network_dio/network_dio.dart';
+import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/base_api.dart';
 import 'package:attendance/utils/common_snackbar_widget.dart';
 import 'package:attendance/utils/prefer.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:attendance/utils/app_color.dart';
-import 'package:attendance/core/controller/attendence_history_controller.dart';
+import 'dart:developer';
 
 class HomeController extends GetxController with WidgetsBindingObserver {
   static HomeController get to => Get.find();
@@ -55,16 +54,15 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     super.onInit();
     _startTimer();
     WidgetsBinding.instance.addObserver(this);
-    print('DEBUG: [onInit] Calling homeApi to load initial state...');
+    log('DEBUG: [onInit] Calling homeApi to load initial state...');
     homeApi();
     loadCheckInOutTimes();
-    addTeamMeeting(); // Add initial team meeting
     Get.put(
         AttendanceHistoryController()); // Initialize AttendanceHistoryController
     Prefs.setString('token',
         'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDg1OTU5OSwiZXhwIjoxNzUwODYzMTk5LCJuYmYiOjE3NTA4NTk1OTksImp0aSI6IlduRHFERVp5U0VDcTd6YWsiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.n5bHfUZmTJMp1pkSSdcaiUbjsJN1HY84y7SuGvVQYTI');
-    // Print initial state
-    printCurrentState('onInit');
+    // log initial state
+    logCurrentState('onInit');
   }
 
   @override
@@ -114,16 +112,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   Future<bool> isCheckInApi(String type,
       {double? latitude, double? longitude}) async {
-    print(
-        'Calling isCheckInApi with type: $type, lat: ${latitude?.toString() ?? 'null'}, lng: ${longitude?.toString() ?? 'null'}');
+    log('Calling isCheckInApi with type: $type, lat: ${latitude?.toString() ?? 'null'}, lng: ${longitude?.toString() ?? 'null'}');
     try {
-      Map<String, String> headers = {
-        'Authorization':
-            'Bearer eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwczovL2RvLXN5c3RlbS5jb20vYXBpL0hybS9sb2dpbiIsImlhdCI6MTc1MDg1OTc0NCwiZXhwIjoxNzUwODYzMzQ0LCJuYmYiOjE3NTA4NTk3NDQsImp0aSI6IlhSZmVjZkRNc1lMQUhLUHQiLCJzdWIiOiI1MCIsInBydiI6IjIzYmQ1Yzg5NDlmNjAwYWRiMzllNzAxYzQwMDg3MmRiN2E1OTc2ZjcifQ.IKTjW46_YKp4aCFG6CDIgZG5Xv2iIz-jNB7Rp3kmAIs',
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        // ...other headers
-      };
       Map<String, dynamic> requestData = {
         "workspace_id": Prefs.getString(AppConstant.workSpaceId),
         "type": type
@@ -131,8 +121,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       // Always send attendence_id for clockout if available
       if (type == 'clockout' && attendanceId.value.isNotEmpty) {
         requestData["attendence_id"] = attendanceId.value;
-        print(
-            'DEBUG: [isCheckInApi] Adding attendence_id to clockout payload: \\${attendanceId.value}');
+        log('DEBUG: [isCheckInApi] Adding attendence_id to clockout payload: \\${attendanceId.value}');
       }
       // Add current date and time
       final now = DateTime.now();
@@ -145,13 +134,13 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       if (longitude != null) {
         requestData["current_longitude"] = longitude.toString();
       }
-      print('POST API URL===> ${API.isClockIn}');
-      print('data===> $requestData');
-      print('DEBUG: [isCheckInApi] Payload being sent: $requestData');
+      log('POST API URL===> ${API.isClockIn}');
+      log('data===> $requestData');
+      log('DEBUG: [isCheckInApi] Payload being sent: $requestData');
       var response = await NetworkHttps.postRequest(API.isClockIn, requestData);
-      print('isCheckInApi response: $response');
-      print('DEBUG: [isCheckInApi] State after API response:');
-      printCurrentState('isCheckInApi - after API response');
+      log('isCheckInApi response: $response');
+      log('DEBUG: [isCheckInApi] State after API response:');
+      logCurrentState('isCheckInApi - after API response');
       // Handle success (clock in or clock out)
       if (response['status'] == 1 || response['status'] == 200) {
         var data = response['data'];
@@ -163,15 +152,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         checkInTime.value = data['clock_in'] ?? "--";
         checkOutTime.value = data['clock_out'] ?? "--";
         totalHours.value = data['total_hours'] ?? "--";
-        print(
-            'DEBUG: isCheckInApi (success) -> isCheckIn: ${isCheckIn.value}, isCheckOut: ${isCheckOut.value}, attendanceId: ${attendanceId.value}');
-        //TODO: Refresh attendance history after check-in/out
+        log('DEBUG: isCheckInApi (success) -> isCheckIn: ${isCheckIn.value}, isCheckOut: ${isCheckOut.value}, attendanceId: ${attendanceId.value}');
 
-        // Refresh attendance history after check-in/out
-        // Get.find<AttendanceHistoryController>().attendanceHistory(
-        //   Get.find<AttendanceHistoryController>().currentMonth.value.toString(),
-        //   Get.find<AttendanceHistoryController>().currentYear.value.toString(),
-        // );
         return true; // Indicate success
       }
       // Handle already clocked in (clock in fail)
@@ -187,9 +169,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         checkInTime.value = data['clock_in'] ?? "--";
         checkOutTime.value = data['clock_out'] ?? "--";
         totalHours.value = data['total_hours'] ?? "--";
-        print(
-            'DEBUG: isCheckInApi (already clocked in) -> isCheckIn: ${isCheckIn.value}, isCheckOut: ${isCheckOut.value}, attendanceId: ${attendanceId.value}');
-        printCurrentState('isCheckInApi - already clocked in');
+        log('DEBUG: isCheckInApi (already clocked in) -> isCheckIn: ${isCheckIn.value}, isCheckOut: ${isCheckOut.value}, attendanceId: ${attendanceId.value}');
+        logCurrentState('isCheckInApi - already clocked in');
         commonToast(response['message']);
         return false;
       }
@@ -203,8 +184,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
         checkInTime.value = "--";
         checkOutTime.value = "--";
         totalHours.value = "--";
-        print(
-            'DEBUG: isCheckInApi (already clocked out) -> isCheckIn: ${isCheckIn.value}, isCheckOut: ${isCheckOut.value}, attendanceId: ${attendanceId.value}');
+        log('DEBUG: isCheckInApi (already clocked out) -> isCheckIn: ${isCheckIn.value}, isCheckOut: ${isCheckOut.value}, attendanceId: ${attendanceId.value}');
         commonToast(response['message']);
         return false;
       }
@@ -213,14 +193,14 @@ class HomeController extends GetxController with WidgetsBindingObserver {
           response['message'] ==
               "You are not within allowed company location.") {
         commonToast(response['message']);
-        print('DEBUG: isCheckInApi (not in area)');
+        log('DEBUG: isCheckInApi (not in area)');
         return false;
       }
       // Handle other errors
       else {
         String errorMsg = response["message"] ?? "An error occurred.";
         commonToast(errorMsg);
-        print('DEBUG: isCheckInApi (other error) -> $errorMsg');
+        log('DEBUG: isCheckInApi (other error) -> $errorMsg');
         return false; // Indicate failure
       }
     } catch (e) {
@@ -246,30 +226,25 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
     isLoading.value = true;
     try {
-      printCurrentState('homeApi - start');
-
-      bool statusSuccess = await isCheckInApi('status');
-      if (!statusSuccess) {
-        isCheckIn.value = false;
-        isCheckOut.value = false;
-        attendanceId.value = "";
-        checkInTime.value = "--";
-        checkOutTime.value = "--";
-        totalHours.value = "--";
-        print(
-            'DEBUG: homeApi (no data or error) -> isCheckIn: ${isCheckIn.value}, attendanceId: ${attendanceId.value}');
-        //printCurrentState('homeApi - no data');
-      }
+      //     logCurrentState('homeApi - start');
+      //  bool statusSuccess = await isCheckInApi('status');
+      //     if (!statusSuccess) {
+      //       isCheckIn.value = false;
+      //       isCheckOut.value = false;
+      //       attendanceId.value = "";
+      //       checkInTime.value = "--";
+      //       checkOutTime.value = "--";
+      //       totalHours.value = "--";
+      //       log('DEBUG: homeApi (no data or error) -> isCheckIn: ${isCheckIn.value}, attendanceId: ${attendanceId.value}');
+      //       //logCurrentState('homeApi - no data');
+      //     }
       announcementList.clear();
       teamMeetings.clear();
 
       //   Fetch meetings from real API
       try {
-        // var meetingsResponse = await rootBundle
-        //     .loadString('asset/dummyMettings.json')
-        //     .then((jsonStr) => jsonDecode(jsonStr));
-
-         var meetingsResponse = await NetworkHttps.getRequest(API.eventCalender);
+        var meetingsResponse =
+            await NetworkHttps.getRequestWithoutLoader(API.eventCalender);
         teamMeetings.clear();
         if (meetingsResponse['status'] == 405) {
           return;
@@ -299,9 +274,10 @@ class HomeController extends GetxController with WidgetsBindingObserver {
             });
           }
         }
+        update();
       } catch (e) {
         if (kDebugMode) {
-          print('Error fetching meetings: $e');
+          log('Error fetching meetings: $e');
         }
       }
     } catch (e) {
@@ -340,8 +316,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
   }
 
   void recordCheckIn({double? latitude, double? longitude}) {
-    print(
-        'DEBUG: recordCheckIn called with latitude: ${latitude?.toString() ?? 'null'}, longitude: ${longitude?.toString() ?? 'null'}');
+    log('DEBUG: recordCheckIn called with latitude: ${latitude?.toString() ?? 'null'}, longitude: ${longitude?.toString() ?? 'null'}');
 
     // Check if already checked in
     if (isCheckIn.value && attendanceId.value.isNotEmpty) {
@@ -359,14 +334,14 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     showAnimatedDialog(
       Get.context!,
       AlertDialog(
-        title: Text('Confirm Check-in'),
-        content: Text('Are you sure you want to check in now?'),
+        title: const Text('Confirm Check-in'),
+        content: const Text('Are you sure you want to check in now?'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(Get.context!).pop(); // Close dialog
             },
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
@@ -398,23 +373,21 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       commonToast("No open attendance record found. Please clock in first.");
       return;
     }
-    print(
-        'DEBUG: recordCheckOut called with latitude: ${latitude?.toString() ?? 'null'}, longitude: ${longitude?.toString() ?? 'null'}');
-    print(
-        'DEBUG: recordCheckOut - attendanceId before API: ${attendanceId.value}');
+    log('DEBUG: recordCheckOut called with latitude: ${latitude?.toString() ?? 'null'}, longitude: ${longitude?.toString() ?? 'null'}');
+    log('DEBUG: recordCheckOut - attendanceId before API: ${attendanceId.value}');
 
     // Show animated confirmation dialog
     showAnimatedDialog(
       Get.context!,
       AlertDialog(
-        title: Text('Confirm Check-out'),
-        content: Text('Are you sure you want to check out now?'),
+        title: const Text('Confirm Check-out'),
+        content: const Text('Are you sure you want to check out now?'),
         actions: [
           TextButton(
             onPressed: () {
               Navigator.of(Get.context!).pop(); // Close dialog
             },
-            child: Text('Cancel'),
+            child: const Text('Cancel'),
           ),
           TextButton(
             onPressed: () async {
@@ -430,7 +403,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
   Future<void> _performCheckOut({double? latitude, double? longitude}) async {
     try {
-      printCurrentState('_performCheckOut - start');
+      logCurrentState('_performCheckOut - start');
 
       // Show loading indicator
       Get.dialog(
@@ -440,8 +413,8 @@ class HomeController extends GetxController with WidgetsBindingObserver {
 
       bool success = await isCheckInApi('clockout',
           latitude: latitude, longitude: longitude);
-      print('DEBUG: recordCheckOut - checkout API result: $success');
-      printCurrentState('_performCheckOut - after API call');
+      log('DEBUG: recordCheckOut - checkout API result: $success');
+      logCurrentState('_performCheckOut - after API call');
       Get.back(); // Close loading dialog
 
       if (success) {
@@ -479,7 +452,7 @@ class HomeController extends GetxController with WidgetsBindingObserver {
       }
     } catch (e) {
       Get.back(); // Close loading dialog
-      print('DEBUG: recordCheckOut - Exception: $e');
+      log('DEBUG: recordCheckOut - Exception: $e');
       Get.snackbar(
         'Error',
         'An error occurred during check-out: $e',
@@ -499,45 +472,16 @@ class HomeController extends GetxController with WidgetsBindingObserver {
     checkOutDisplayTime.value = Prefs.getString('check_out_time') ?? "";
   }
 
-  void addTeamMeeting() {
-    // This function is now unused since meetings are fetched from the API
-  }
-
-  // Debug method to print current state
-  void printCurrentState(String context) {
+  // Debug method to log current state
+  void logCurrentState(String context) {
     if (kDebugMode) {
-      print('DEBUG: [$context] Current State:');
-      print('  - isCheckIn: ${isCheckIn.value}');
-      print('  - isCheckOut: ${isCheckOut.value}');
-      print('  - attendanceId: ${attendanceId.value}');
-      print('  - checkInTime: ${checkInTime.value}');
-      print('  - checkOutTime: ${checkOutTime.value}');
-      print('  - totalHours: ${totalHours.value}');
+      log('DEBUG: [$context] Current State:');
+      log('  - isCheckIn: ${isCheckIn.value}');
+      log('  - isCheckOut: ${isCheckOut.value}');
+      log('  - attendanceId: ${attendanceId.value}');
+      log('  - checkInTime: ${checkInTime.value}');
+      log('  - checkOutTime: ${checkOutTime.value}');
+      log('  - totalHours: ${totalHours.value}');
     }
-  }
-
-  // Test method for debugging checkout
-  void testCheckOut() {
-    print('DEBUG: testCheckOut called');
-    printCurrentState('testCheckOut');
-    recordCheckOut(latitude: 0.0, longitude: 0.0);
-  }
-
-  // Test method for debugging snackbar
-  void testSnackbar() {
-    print('DEBUG: testSnackbar called');
-    Get.snackbar(
-      'Test',
-      'This is a test snackbar',
-      backgroundColor: Colors.blue,
-      colorText: Colors.white,
-      duration: const Duration(seconds: 3),
-    );
-  }
-
-  // Method to manually refresh state for testing
-  void refreshState() {
-    print('DEBUG: refreshState called');
-    homeApi();
   }
 }

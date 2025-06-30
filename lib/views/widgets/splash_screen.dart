@@ -1,12 +1,11 @@
 import 'dart:developer';
 
-import 'package:attendance/controllers/face_scan_controller.dart';
-import 'package:attendance/views/pages/face_scan_screen.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:attendance/utils/prefer.dart';
+import 'package:attendance/views/pages/face_scan_screen.dart';
 import 'package:attendance/views/pages/home _screen.dart';
 import 'package:attendance/views/pages/login_screen.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -35,15 +34,15 @@ class _SplashScreenState extends State<SplashScreen> {
     // Check token and navigate accordingly
     final token = Prefs.getToken();
 
-    if (token == '') {
+    if (token == '' || token.isEmpty) {
       Get.offAll(() => LoginScreen());
-    } else if (DateTime.parse(Prefs.getLastFaceScanTime()).toUtc().day !=
-        DateTime.now().toUtc().day) {
-      log("### last face scan time ${DateTime.parse(Prefs.getLastFaceScanTime())}");
-      log("### now ${DateTime.now().toUtc()}");
-      Get.offAll(() => const FaceScanScreen());
     } else {
-      Get.offAll(() => const HomeScreen());
+      if (DateTime.parse(Prefs.getLastFaceScanTime()).toUtc().day !=
+          DateTime.now().toUtc().day) {
+        Get.offAll(() => const FaceScanScreen());
+      } else {
+        Get.offAll(() => const HomeScreen());
+      }
     }
   }
 

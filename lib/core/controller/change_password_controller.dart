@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_log
 
 import 'package:attendance/config/repository/change_password_repository.dart';
 import 'package:attendance/utils/common_snackbar_widget.dart';
@@ -6,7 +6,7 @@ import 'package:attendance/views/pages/login_screen.dart';
 import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
+import 'dart:developer';
 import '../../utils/prefer.dart';
 
 class ChangePasswordController extends GetxController {
@@ -29,7 +29,7 @@ class ChangePasswordController extends GetxController {
         oldPassword: oldPassword,
         newPassword: newPassword,
         confirmPassword: confirmPassword);
-    print("response===>$response");
+    log("response===>$response");
     if (response != null) {
       if (response['status'] == 1) {
         commonToast(response['message']);

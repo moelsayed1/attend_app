@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:attendance/core/controller/leave_request_controller.dart';
-import 'package:attendance/core/model/leave_history_response.dart';
 import 'package:attendance/core/model/leave_types_response.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/common_snackbar_widget.dart';
@@ -13,6 +12,7 @@ import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:developer';
 
 // ignore: must_be_immutable
 class LeaveRequestScreen extends StatelessWidget {
@@ -32,23 +32,24 @@ class LeaveRequestScreen extends StatelessWidget {
       }
       if (arguments.containsKey('startDate')) {
         try {
-          requestController.startDate.value = DateTime.parse(arguments['startDate']);
+          requestController.startDate.value =
+              DateTime.parse(arguments['startDate']);
         } catch (e) {
-          print("Error parsing start date: $e");
+          log("Error parsing start date: $e");
         }
       }
       if (arguments.containsKey('endDate')) {
         try {
-          requestController.endDate.value = DateTime.parse(arguments['endDate']);
+          requestController.endDate.value =
+              DateTime.parse(arguments['endDate']);
         } catch (e) {
-          print("Error parsing end date: $e");
+          log("Error parsing end date: $e");
         }
       }
     }
 
     return Scaffold(
       backgroundColor: AppColor.appBackGround,
-
       appBar: AppBar(
           surfaceTintColor: Colors.transparent,
           backgroundColor: AppColor.cWhite,
@@ -58,9 +59,7 @@ class LeaveRequestScreen extends StatelessWidget {
               Icons.arrow_back,
               color: Colors.black,
             ),
-            onPressed: () => {
-              Get.back()
-            },
+            onPressed: () => {Get.back()},
           ),
           title: Text(
             "Leave Request".tr,
@@ -111,7 +110,6 @@ class LeaveRequestScreen extends StatelessWidget {
                                   horizontal: 12, vertical: 10),
                               decoration: BoxDecoration(
                                 borderRadius: BorderRadius.circular(10),
-
                                 color: AppColor.cWhite,
                               ),
                               child: Row(
@@ -142,12 +140,10 @@ class LeaveRequestScreen extends StatelessWidget {
                               borderRadius: BorderRadius.circular(10),
                               color: AppColor.cWhite,
                             ),
-
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                assetSvdImageWidget(
-                                    image: ImagePath.calender),
+                                assetSvdImageWidget(image: ImagePath.calender),
                                 horizontalSpace(8),
                                 Text(
                                   requestController.getFormattedDate(
@@ -177,15 +173,16 @@ class LeaveRequestScreen extends StatelessWidget {
                     child: DropdownButton(
                       icon: Icon(Icons.arrow_drop_down),
                       dropdownColor: AppColor.cWhite,
-                      value: requestController.leaveType.value.isEmpty ? null : requestController.leaveType.value,
+                      value: requestController.leaveType.value.isEmpty
+                          ? null
+                          : requestController.leaveType.value,
                       iconSize: 24,
                       isExpanded: true,
                       style: TextStyle(color: Colors.black, fontSize: 16),
                       underline: SizedBox(),
                       hint: Text("Select an leave type"),
                       onChanged: (newValue) {
-                        requestController.leaveType.value=newValue.toString();
-
+                        requestController.leaveType.value = newValue.toString();
                       },
                       items: requestController.leaveTypes
                           .map((LeaveType valueItem) {
@@ -195,7 +192,8 @@ class LeaveRequestScreen extends StatelessWidget {
                               "${valueItem.title} (${valueItem.used ?? 0}/${valueItem.days ?? 0} used)",
                             ),
                             onTap: () {
-                              requestController.leaveId.value = valueItem.id.toString();
+                              requestController.leaveId.value =
+                                  valueItem.id.toString();
                             });
                       }).toList(),
                     ),
@@ -245,27 +243,48 @@ class LeaveRequestScreen extends StatelessWidget {
                         child: CommonButton(
                             title: "Apply",
                             onPressed: () async {
-                              print("date${requestController.getParameterFormattedDate(requestController.startDate.value)}");
-                              print("enddate${requestController.getParameterFormattedDate(requestController.startDate.value)}");
-
-                              if (requestController.leaveType.isEmpty && requestController.leaveId.isEmpty) {
-                                commonToast("Leave type field is required.");
-                              } else if (reasonController.text.isEmpty) {
-                                commonToast("Leave reason field is required");
-                              } else if (remarkController.text.isEmpty) {
-                                commonToast("Leave remark field is required");
-                              } else {
-                                // Make API request - the controller will handle navigation
-                                await requestController.leaveRequest({
-                                  "leave_reason": reasonController.text,
-                                  "start_date": requestController.getParameterFormattedDate(requestController.startDate.value), 
-                                  "end_date": requestController.getParameterFormattedDate(requestController.endDate.value),
-                                  "remark": remarkController.text,
-                                  "user_id": Prefs.getUserID(),
-                                  "leave_type_id": requestController.leaveId.value,
-                                });
+                              // Validate all required fields
+                              if (requestController.leaveType.isEmpty ||
+                                  requestController.leaveId.isEmpty) {
+                                commonToast("Please select a leave type");
+                                return;
                               }
-                              Get.back();
+
+                              if (reasonController.text.trim().isEmpty) {
+                                commonToast("Please enter a reason for leave");
+                                return;
+                              }
+
+                              if (remarkController.text.trim().isEmpty) {
+                                commonToast("Please enter remarks");
+                                return;
+                              }
+
+                              // Make API request with validated data
+
+                              try {
+                                await requestController.leaveRequest({
+                                  "leave_reason": reasonController.text.trim(),
+                                  "start_date": requestController
+                                      .getParameterFormattedDate(
+                                          requestController.startDate.value),
+                                  "end_date": requestController
+                                      .getParameterFormattedDate(
+                                          requestController.endDate.value),
+                                  "remark": remarkController.text.trim(),
+                                  "user_id": Prefs.getUserID(),
+                                  "leave_type_id":
+                                      requestController.leaveId.value,
+                                });
+                                Get.back();
+                                await requestController.getMyLeaves();
+                                requestController.update();
+                                Get.forceAppUpdate();
+                              } catch (e) {
+                                log("Error submitting leave request: $e");
+                                commonToast(
+                                    "Failed to submit leave request. Please try again.");
+                              }
                             }),
                       ),
                       horizontalSpace(10),

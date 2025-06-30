@@ -1,12 +1,13 @@
 // ignore_for_file: prefer_const_constructors
 
+import 'dart:developer';
 
 import 'package:attendance/utils/ui_text_style.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+
 import '../views/widgets/common_space_divider_widget.dart';
 import 'app_color.dart';
-
 
 class CommonTextField extends StatefulWidget {
   final TextEditingController? controller;
@@ -70,7 +71,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
   }
 
   void _onFocusChange() {
-    debugPrint("Focus: ${_focus.hasFocus.toString()}");
+    log("Focus: ${_focus.hasFocus.toString()}");
     setState(() {});
   }
 
@@ -86,9 +87,7 @@ class _CommonTextFieldState extends State<CommonTextField> {
                 widget.labelText!,
                 style: pMedium16.copyWith(color: AppColor.cBorder),
               ),
-        widget.labelText == ''
-            ? verticalSpace(0)
-            :  verticalSpace(15),
+        widget.labelText == '' ? verticalSpace(0) : verticalSpace(15),
         Center(
           child: TextFormField(
             controller: widget.controller,
@@ -109,8 +108,8 @@ class _CommonTextFieldState extends State<CommonTextField> {
               prefixIcon: widget.prefix == null
                   ? SizedBox()
                   : Padding(
-                  padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-                  child: SvgPicture.asset(widget.prefix ?? "")),
+                      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
+                      child: SvgPicture.asset(widget.prefix ?? "")),
               suffixIcon: widget.suffix,
               // prefixIconConstraints: BoxConstraints(maxWidth: 55, minWidth: 54),
               suffixIconConstraints: BoxConstraints(maxWidth: 45, minWidth: 42),
@@ -127,8 +126,8 @@ class _CommonTextFieldState extends State<CommonTextField> {
                 borderSide: BorderSide(color: AppColor.redColor),
               ),
               disabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(15),
-                borderSide: BorderSide(color: AppColor.cBorder)),
+                  borderRadius: BorderRadius.circular(15),
+                  borderSide: BorderSide(color: AppColor.cBorder)),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
                 borderSide: BorderSide(color: AppColor.primaryColor, width: 1),

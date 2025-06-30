@@ -16,7 +16,7 @@ class ChangePasswordRepository {
       'password_confirmation': confirmPassword,
       'current_password': oldPassword
     });
-    if (response != null && response['status'] == 1) {
+    if (response['status'] == 1) {
       return response;
     }
     return null;

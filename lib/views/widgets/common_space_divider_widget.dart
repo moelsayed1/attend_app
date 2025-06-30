@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 
 import '../../utils/app_color.dart';
 
-
 Widget verticalSpace(double height) {
   return SizedBox(
     height: height,
@@ -23,7 +22,9 @@ Widget horizontalDivider({Color? color}) {
   );
 }
 
-
-Widget dataNotFound(String message){
-  return Center(child: Text(message,style: pMedium18.copyWith(color: AppColor.cBlack),textAlign: TextAlign.center));
+Widget dataNotFound(String message) {
+  return Center(
+      child: Text(message,
+          style: pMedium18.copyWith(color: AppColor.cBlack),
+          textAlign: TextAlign.center));
 }

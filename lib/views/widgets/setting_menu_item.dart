@@ -1,12 +1,10 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:attendance/utils/app_color.dart';
-import 'package:attendance/utils/image_path.dart';
 import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
+import 'package:flutter/material.dart';
 
 class SettingMenuItem extends StatelessWidget {
   final String iconPath;

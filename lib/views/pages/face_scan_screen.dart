@@ -1,15 +1,17 @@
+import 'dart:developer';
+import 'dart:math' as math;
+
+import 'package:attendance/controllers/face_scan_controller.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/prefer.dart';
 import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_button.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
-import 'package:attendance/controllers/face_scan_controller.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:camera/camera.dart';
-import 'dart:math' as math;
+import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:get/get.dart';
 
 class FaceScanScreen extends StatelessWidget {
   const FaceScanScreen({super.key});
@@ -47,7 +49,8 @@ class FaceScanScreen extends StatelessWidget {
                   ),
                 ),
                 IconButton(
-                  icon: Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
+                  icon:
+                      Icon(Icons.switch_camera_rounded, color: AppColor.cBlack),
                   onPressed: () {
                     if (controller.cameras.length > 1) {
                       controller.toggleCamera();
@@ -121,7 +124,7 @@ class FaceScanScreen extends StatelessWidget {
                                         ),
                                       );
                                     } catch (e) {
-                                      print('Camera preview error: $e');
+                                      log('Camera preview error: $e');
                                       return Container(
                                         width: circleSize,
                                         height: circleSize,

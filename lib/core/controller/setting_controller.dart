@@ -1,9 +1,9 @@
 import 'package:attendance/config/repository/logout_repository.dart';
 import 'package:attendance/utils/app_constant.dart';
-import 'package:attendance/utils/prefer.dart';
-import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:attendance/utils/common_snackbar_widget.dart';
+import 'package:attendance/utils/prefer.dart';
 import 'package:attendance/views/pages/login_screen.dart';
+import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

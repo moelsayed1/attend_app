@@ -1,19 +1,18 @@
-// ignore_for_file: prefer_const_constructors
+// ignore_for_file: file_names
 
 import 'package:attendance/core/controller/home_controller.dart';
 //import 'package:attendance/core/model/meeting_model.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/ui_text_style.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:attendance/views/widgets/custom_animated_bottom_bar.dart';
-
-// Import your other screens here
-import 'package:attendance/views/pages/leave_history.dart';
 import 'package:attendance/views/pages/attendance_history.dart';
-import 'package:attendance/views/pages/setting_screen.dart';
 import 'package:attendance/views/pages/holiday_list.dart';
 import 'package:attendance/views/pages/home_tab_content.dart'; // Import the new file
+// Import your other screens here
+import 'package:attendance/views/pages/leave_history.dart';
+import 'package:attendance/views/pages/setting_screen.dart';
+import 'package:attendance/views/widgets/custom_animated_bottom_bar.dart';
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -50,17 +49,11 @@ class _HomeScreenState extends State<HomeScreen> {
       ];
 
   // List of titles for each tab
-  final List<String> _titles = [
-    'Dashboard',
-    'Leaves',
-    'Attendance',
-    'Holidays',
-    'Settings'
-  ];
 
   void _onItemTapped(int index) {
-    if (_selectedIndex == index)
+    if (_selectedIndex == index) {
       return; // Don't do anything if same tab is tapped
+    }
     setState(() {
       _selectedIndex = index;
     });
@@ -79,9 +72,13 @@ class _HomeScreenState extends State<HomeScreen> {
     //Get.put(LeaveRequestController(), permanent: true);
     // Get.put(AttendanceHistoryController(), permanent: true);
     //Get.put(EventController(), permanent: true);
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      // homeController.homeApi();
-    });
+    
+    // Wrap API call in try-catch to handle errors
+    try {
+      homeController.homeApi();
+    } catch (e) {
+      debugPrint('Error loading home data: $e');
+    }
   }
 
   @override
@@ -103,15 +100,19 @@ class _HomeScreenState extends State<HomeScreen> {
               centerTitle: true,
             )
           : null,
-      body: PageView(
-        controller: homeController.pageController,
-        onPageChanged: (index) {
-          setState(() {
-            _selectedIndex = index;
-          });
-        },
-        physics: NeverScrollableScrollPhysics(), // Disable swiping
-        children: _screens,
+      body: GetBuilder<HomeController>(
+        builder: (controller) {
+          return PageView(
+            controller: homeController.pageController,
+            onPageChanged: (index) {
+              setState(() {
+                _selectedIndex = index;
+              });
+            },
+            physics: const NeverScrollableScrollPhysics(), // Disable swiping
+            children: _screens,
+          );
+        }
       ),
       bottomNavigationBar: CustomAnimatedBottomBar(
         selectedIndex: _selectedIndex,

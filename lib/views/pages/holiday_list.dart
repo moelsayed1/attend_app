@@ -1,3 +1,5 @@
+// ignore_for_file: deprecated_member_use
+
 import 'package:attendance/core/controller/holiday_list_controller.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/helper.dart';
@@ -6,7 +8,6 @@ import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:attendance/views/pages/leave_request.dart';
 
 class HolidayList extends StatefulWidget {
   const HolidayList({super.key});
@@ -24,10 +25,6 @@ class _HolidayListState extends State<HolidayList> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) async {
-      await holidayController.getHolidayList();
-    });
   }
 
   @override
@@ -44,18 +41,18 @@ class _HolidayListState extends State<HolidayList> {
       ),
       backgroundColor: AppColor.appBackGround,
       body: SafeArea(
-        child: Obx(() {
+        child: GetBuilder<HolidayListController>(builder: (controller) {
           return RefreshIndicator(
             onRefresh: () async {
-              await holidayController.getHolidayList();
+              await controller.getHolidayList();
             },
-            child: holidayController.holidayList.isEmpty && !holidayController.isLoading.value
+            child: controller.holidayList.isEmpty && !controller.isLoading.value
                 ? SingleChildScrollView(
                     physics: const AlwaysScrollableScrollPhysics(),
                     child: SizedBox(
                       height: MediaQuery.of(context).size.height * 0.7,
                       child: Center(
-                        child: Column(
+                          child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
@@ -83,11 +80,11 @@ class _HolidayListState extends State<HolidayList> {
                     shrinkWrap: true,
                     controller: scrollController,
                     physics: const AlwaysScrollableScrollPhysics(),
-                    itemCount: holidayController.holidayList.length,
+                    itemCount: controller.holidayList.length,
                     padding: const EdgeInsets.symmetric(
                         vertical: 10, horizontal: 16),
                     itemBuilder: (context, index) {
-                      var data = holidayController.holidayList[index];
+                      var data = controller.holidayList[index];
 
                       return GestureDetector(
                         child: Container(
@@ -162,8 +159,7 @@ class _HolidayListState extends State<HolidayList> {
                                       decoration: BoxDecoration(
                                         color: AppColor.primaryColor
                                             .withOpacity(0.1),
-                                        borderRadius:
-                                            BorderRadius.circular(20),
+                                        borderRadius: BorderRadius.circular(20),
                                       ),
                                       child: Text(
                                         data.className ?? "",

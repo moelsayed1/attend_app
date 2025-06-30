@@ -6,7 +6,6 @@ import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:intl/intl.dart';
 
 class TeamMeetingsSection extends StatelessWidget {
   final HomeController homeController;

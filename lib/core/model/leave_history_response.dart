@@ -21,9 +21,9 @@ class MyLeavesResponse {
     status = 1; // Default success status
     message = "Success";
     data = <LeaveData>[];
-    dataArray.forEach((v) {
+    for (var v in dataArray) {
       data!.add(LeaveData.fromJson(v));
-    });
+    }
   }
 
   Map<String, dynamic> toJson() {

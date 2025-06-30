@@ -1,18 +1,16 @@
-import 'dart:convert';
 import 'package:attendance/core/model/leave_history_response.dart';
 import 'package:attendance/core/model/leave_types_response.dart';
-import 'package:attendance/utils/app_constant.dart';
-import 'package:attendance/utils/common_snackbar_widget.dart';
-import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:attendance/network_dio/network_dio.dart';
+import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/base_api.dart';
+import 'package:attendance/utils/common_snackbar_widget.dart';
 import 'package:attendance/utils/prefer.dart';
 import 'package:attendance/views/pages/leave_history.dart';
+import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-
+import 'dart:developer';
 class LeaveRequestController extends GetxController {
   RxList<LeaveData> myLeavesHistory = <LeaveData>[].obs;
   RxList<LeaveType> leaveTypes = <LeaveType>[].obs;
@@ -26,8 +24,6 @@ class LeaveRequestController extends GetxController {
   RxString leaveType = ''.obs;
   RxString leaveId = ''.obs;
 
-
-
   Future<void> selectStartDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
       context: context,
@@ -39,7 +35,7 @@ class LeaveRequestController extends GetxController {
       startDate.value = picked;
       endDate.value = picked;
     }
-    print("startDate ${startDate.value}");
+    log("startDate ${startDate.value}");
   }
 
   Future<void> selectEndDate(BuildContext context) async {
@@ -52,7 +48,7 @@ class LeaveRequestController extends GetxController {
     if (picked != null && picked != endDate.value) {
       endDate.value = picked;
     }
-    print("endDate ${endDate.value}");
+    log("endDate ${endDate.value}");
   }
 
   String getFormattedDate(DateTime now) {
@@ -73,26 +69,24 @@ class LeaveRequestController extends GetxController {
 
     try {
       // Make API request
-      final response = await NetworkHttps.postRequest(
-        API.getLeaves,
-        {"workspace_id": Prefs.getString(AppConstant.workSpaceId)}
-      );
+      final response = await NetworkHttps.postRequest(API.getLeaves,
+          {"workspace_id": Prefs.getString(AppConstant.workSpaceId)});
 
-      print("Debug - API Response: $response");
+      log("Debug - API Response: $response");
 
       // Process response outside of build context
       if (response.containsKey("status")) {
         if (response["status"] == 1 || response["status"] == 200) {
           myLeavesResponse = MyLeavesResponse.fromJson(response);
         } else {
-          print("API Error: ${response['status']}");
+          log("API Error: ${response['status']}");
           Get.snackbar('Error', response["message"] ?? 'Unknown error');
           return;
         }
       } else if (response.containsKey("data")) {
         myLeavesResponse = MyLeavesResponse.fromDataArray(response["data"]);
       } else {
-        print("Invalid response format");
+        log("Invalid response format");
         Get.snackbar('Error', 'Invalid response format');
         return;
       }
@@ -100,7 +94,7 @@ class LeaveRequestController extends GetxController {
       // Update observable list safely
       if (myLeavesResponse?.data != null) {
         myLeavesHistory.clear();
-        
+
         // Sort the data by appliedOn field in descending order (newest first)
         List<LeaveData> sortedData = List.from(myLeavesResponse!.data!);
         sortedData.sort((a, b) {
@@ -108,7 +102,7 @@ class LeaveRequestController extends GetxController {
           if (a.appliedOn == null && b.appliedOn == null) return 0;
           if (a.appliedOn == null) return 1; // null values go to the end
           if (b.appliedOn == null) return -1;
-          
+
           // Parse dates and compare in descending order (newest first)
           try {
             DateTime dateA = DateTime.parse(a.appliedOn!);
@@ -119,16 +113,15 @@ class LeaveRequestController extends GetxController {
             return b.appliedOn!.compareTo(a.appliedOn!);
           }
         });
-        
+
         myLeavesHistory.addAll(sortedData);
-        print("Debug - Loaded ${myLeavesHistory.length} leaves successfully (sorted by newest first)");
+        log("Debug - Loaded ${myLeavesHistory.length} leaves successfully (sorted by newest first)");
       } else {
         myLeavesHistory.clear();
-        print("Debug - No leaves found");
+        log("Debug - No leaves found");
       }
-
     } catch (e) {
-      print("Error in getMyLeaves: $e");
+      log("Error in getMyLeaves: $e");
       Get.snackbar('Error', 'Failed to load leave history');
       myLeavesHistory.clear();
     } finally {
@@ -144,10 +137,10 @@ class LeaveRequestController extends GetxController {
       Loader.hideLoader();
 
       commonToast(response["message"]);
-      
+
       // Refresh the leave history data first
       await getMyLeaves();
-      
+
       // Navigate to leave history page using the same controller instance
       Get.offAll(() => const LeaveHistory());
     } else {

@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'package:attendance/core/controller/login_controller.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/common_text_field.dart';
@@ -8,8 +10,6 @@ import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:attendance/views/pages/home _screen.dart';
-import 'package:attendance/views/pages/face_scan_screen.dart';
 
 class LoginScreen extends StatelessWidget {
   LoginScreen({super.key});
@@ -35,7 +35,8 @@ class LoginScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       assetSvdImageWidget(
-                          image: "asset/image/svg_image/login_illustration 1.svg",
+                          image:
+                              "asset/image/svg_image/login_illustration 1.svg",
                           height: 250),
                       Text(
                         "Welcome Back !.".tr,
@@ -85,7 +86,8 @@ class LoginScreen extends StatelessWidget {
                         },
                         suffix: GestureDetector(
                           onTap: () {
-                            loginController.isHiddenPassword.value = !loginController.isHiddenPassword.value;
+                            loginController.isHiddenPassword.value =
+                                !loginController.isHiddenPassword.value;
                           },
                           child: Icon(
                             loginController.isHiddenPassword.value
@@ -101,9 +103,9 @@ class LoginScreen extends StatelessWidget {
                           onPressed: () {
                             if (formKey.currentState!.validate()) {
                               loginController.authLogin(
-                                email: loginController.emailController.text, 
-                                password: loginController.passwordController.text
-                              );
+                                  email: loginController.emailController.text,
+                                  password:
+                                      loginController.passwordController.text);
                             }
                           })
                     ],
@@ -116,4 +118,4 @@ class LoginScreen extends StatelessWidget {
       ),
     );
   }
-} 
+}

@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
+import 'package:flutter/material.dart';
 
 class BottomNavItem {
   final String iconPath;

@@ -1,16 +1,16 @@
 import 'package:attendance/core/controller/dashboard_controller.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:get/get.dart';
 
 class DashboardScreen extends StatelessWidget {
-
   const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-  final DashboardController dashboardController = Get.put(DashboardController());
+    final DashboardController dashboardController =
+        Get.put(DashboardController());
 
     return Scaffold(
       body: Obx(() {

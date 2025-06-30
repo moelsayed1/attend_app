@@ -5,16 +5,16 @@ import 'dart:developer';
 import 'package:attendance/core/controller/home_controller.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/image_path.dart';
+import 'package:attendance/utils/location_helper.dart';
 import 'package:attendance/utils/ui_text_style.dart';
+import 'package:attendance/views/widgets/attendance_row_widget.dart';
+import 'package:attendance/views/widgets/common_button.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:attendance/views/widgets/icon_and_image.dart';
-import 'package:attendance/views/widgets/common_button.dart';
-import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import 'package:attendance/views/widgets/attendance_row_widget.dart';
 import 'package:attendance/views/widgets/team_meetings_section.dart';
+import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
-import 'package:attendance/utils/location_helper.dart';
+import 'package:get/get.dart';
 
 class HomeTabContent extends StatelessWidget {
   final HomeController homeController;
@@ -26,7 +26,16 @@ class HomeTabContent extends StatelessWidget {
   Future<void> handleLocationBasedAction(
       Function({double? latitude, double? longitude}) action) async {
     try {
-      Position? position = await LocationHelper.getCurrentLocation();
+      // Show loading indicator while getting location
+      Get.dialog(
+        const Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      Position? position = await LocationHelper.getCurrentLocation()
+          .timeout(const Duration(seconds: 10)); // Add timeout
+
+      Get.back(); // Close loading dialog
 
       if (position == null) {
         Get.snackbar(
@@ -40,11 +49,9 @@ class HomeTabContent extends StatelessWidget {
       log('Location captured: ${position.latitude}, ${position.longitude}');
 
       // Execute the action with location data
-      await action(
-          latitude: position.latitude,
-          longitude: position
-              .longitude); // Ensure the action completes before proceeding
+      await action(latitude: position.latitude, longitude: position.longitude);
     } catch (e) {
+      Get.back(); // Close loading dialog if error occurs
       log('Error getting location: $e');
       Get.snackbar(
         'Error',
@@ -57,9 +64,8 @@ class HomeTabContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Obx(() {
-      // Debug: Print button state
-      print(
-          'DEBUG: [UI] Check Out button state - isCheckIn: ${homeController.isCheckIn.value}, attendanceId: ${homeController.attendanceId.value}, button enabled: ${homeController.isCheckIn.value && homeController.attendanceId.value.isNotEmpty}');
+      // Debug: log button state
+      log('DEBUG: [UI] Check Out button state - isCheckIn: ${homeController.isCheckIn.value}, attendanceId: ${homeController.attendanceId.value}, button enabled: ${homeController.isCheckIn.value && homeController.attendanceId.value.isNotEmpty}');
 
       return SingleChildScrollView(
         child: Padding(
@@ -90,14 +96,11 @@ class HomeTabContent extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               verticalSpace(32),
-              // Main Fingerprint Button
+              // Main Fingerlog Button
               IconButton(
                 iconSize: 80,
                 onPressed: () async {
-                  print('DEBUG: Fingerprint pressed. isCheckIn: ' +
-                      homeController.isCheckIn.value.toString() +
-                      ', attendanceId: ' +
-                      homeController.attendanceId.value);
+                  log('DEBUG: Fingerlog pressed. isCheckIn: ${homeController.isCheckIn.value}, attendanceId: ${homeController.attendanceId.value}');
 
                   if (!homeController.isCheckIn.value) {
                     // If not checked in, attempt check-in
@@ -159,10 +162,9 @@ class HomeTabContent extends StatelessWidget {
                               homeController.attendanceId.value.isNotEmpty &&
                               !homeController.isCheckOut.value)
                           ? () async {
-                              print(
-                                  'DEBUG: [Button] Check Out pressed. isCheckIn: ${homeController.isCheckIn.value}, isCheckOut: ${homeController.isCheckOut.value}, attendanceId: ${homeController.attendanceId.value}');
-                              homeController.printCurrentState(
-                                  'Check Out Button Pressed');
+                              log('DEBUG: [Button] Check Out pressed. isCheckIn: ${homeController.isCheckIn.value}, isCheckOut: ${homeController.isCheckOut.value}, attendanceId: ${homeController.attendanceId.value}');
+                              homeController
+                                  .logCurrentState('Check Out Button Pressed');
                               await handleLocationBasedAction(
                                   homeController.recordCheckOut);
                               // No need for homeApi() here, recordCheckOut handles its own updates and potentially calls homeApi

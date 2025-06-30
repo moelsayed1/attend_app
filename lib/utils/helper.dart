@@ -25,7 +25,6 @@ enum FormatType {
   ddMMMYYYY,
   day,
   ddMMyyyy,
-
 }
 
 String getDateFormmatted(DateTime date) {
@@ -33,6 +32,7 @@ String getDateFormmatted(DateTime date) {
   final formattedDate = formatter.format(date);
   return formattedDate;
 }
+
 String formatForDateTime(FormatType formatType) {
   switch (formatType) {
     case FormatType.date:
@@ -53,15 +53,11 @@ String formatForDateTime(FormatType formatType) {
       }
     case FormatType.day:
       {
-        return"EEEE";
+        return "EEEE";
       }
-    case FormatType.ddMMyyyy :
+    case FormatType.ddMMyyyy:
       {
         return "dd/MM/yyyy";
-      }
-    default:
-      {
-        return "";
       }
   }
 }

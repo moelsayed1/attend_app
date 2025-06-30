@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../utils/app_constant.dart';
+
 import '../../utils/prefer.dart';
-import '../../views/pages/login_screen.dart';
 
 class TokenInterceptor extends GetMiddleware {
   @override

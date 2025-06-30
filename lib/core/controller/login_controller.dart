@@ -1,20 +1,17 @@
-import 'package:attendance/controllers/face_scan_controller.dart';
+import 'dart:convert';
+
 import 'package:attendance/core/model/login_response.dart';
+import 'package:attendance/network_dio/network_dio.dart';
 import 'package:attendance/utils/app_constant.dart';
+import 'package:attendance/utils/base_api.dart';
+import 'package:attendance/utils/biometric_helper.dart';
+import 'package:attendance/utils/common_snackbar_widget.dart';
 import 'package:attendance/utils/prefer.dart';
+import 'package:attendance/views/pages/face_scan_screen.dart';
 import 'package:attendance/views/widgets/loading_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:attendance/network_dio/network_dio.dart';
-import 'package:attendance/utils/base_api.dart';
-import 'package:attendance/utils/common_snackbar_widget.dart';
-import 'package:attendance/utils/biometric_helper.dart';
-import 'package:attendance/utils/location_helper.dart';
-import 'package:geolocator/geolocator.dart';
-import 'dart:convert';
-import 'dart:convert' show utf8;
-import 'package:attendance/views/pages/face_scan_screen.dart';
-
+import 'dart:developer';
 String defaultLanguageCode = Prefs.getString(AppConstant.languageCode) == ''
     ? 'en'
     : Prefs.getString(AppConstant.languageCode);
@@ -62,11 +59,10 @@ class LoginController extends GetxController {
       workSpaceList.value = sampleWorkspaces;
       Prefs.setString(AppConstant.workSpaceArray, jsonEncode(sampleWorkspaces));
 
-      print("✅ Workspace data stored successfully");
-      print(
-          "Available workspaces: ${sampleWorkspaces.map((w) => '${w.name} (ID: ${w.id})').join(', ')}");
+      log("✅ Workspace data stored successfully");
+      log("Available workspaces: ${sampleWorkspaces.map((w) => '${w.name} (ID: ${w.id})').join(', ')}");
     } catch (e) {
-      print("❌ Error fetching workspace data: $e");
+      log("❌ Error fetching workspace data: $e");
     }
   }
 
@@ -102,7 +98,7 @@ class LoginController extends GetxController {
 
       return payloadMap;
     } catch (e) {
-      print("Error decoding JWT: $e");
+      log("Error decoding JWT: $e");
       return {};
     }
   }
@@ -116,15 +112,15 @@ class LoginController extends GetxController {
     try {
       var response = await NetworkHttps.postRequest(
           API.loginLink, {'email': email, 'password': password});
-      print("Login Response: $response");
+      log("Login Response: $response");
 
-      if (response != null && response['status'] == 200) {
+      if (response['status'] == 200) {
         // Optional: Biometric authentication (can be disabled for development)
         bool isAuthenticated = true; // Set to true to skip biometric for now
         try {
           isAuthenticated = await BiometricHelper.authenticate();
         } catch (e) {
-          print("Biometric auth error: $e");
+          log("Biometric auth error: $e");
           isAuthenticated = true; // Continue without biometric for development
         }
 
@@ -139,7 +135,7 @@ class LoginController extends GetxController {
         // try {
         //   position = await LocationHelper.getCurrentLocation();
         // } catch (e) {
-        //   print("Location error: $e");
+        //   log("Location error: $e");
         //   // Continue without location for development
         // }
 
@@ -149,7 +145,7 @@ class LoginController extends GetxController {
           // Store token properly
           String token = loginResponse.data!.token ?? "";
           Prefs.setToken(token);
-          print("Token stored: $token");
+          log("Token stored: $token");
 
           // Store user data in preferences
           Prefs.setUserID(loginResponse.data!.user!.id.toString());
@@ -183,12 +179,12 @@ class LoginController extends GetxController {
         }
       } else {
         Loader.hideLoader();
-        commonToast(response?["message"] ?? "Login failed");
+        commonToast(response["message"] ?? "Login failed");
       }
     } catch (e) {
       Loader.hideLoader();
       commonToast("An error occurred during login");
-      print("Login error: $e");
+      log("Login error: $e");
     }
   }
 }

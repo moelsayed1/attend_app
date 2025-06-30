@@ -1,3 +1,5 @@
+// ignore_for_file: non_constant_identifier_names
+
 class ImagePath {
   static String  deleteIcn="asset/image/svg_image/ic_delete.svg";
   static String  logoutIcn="asset/image/svg_image/ic_logout.svg";

@@ -1,7 +1,7 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_log
 
 class Validator {
-  static String? validateRequired(String value,{String? name}) {
+  static String? validateRequired(String value, {String? name}) {
     if (value.isEmpty) {
       return 'Field is required';
     } else {

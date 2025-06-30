@@ -1,12 +1,11 @@
-import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/prefer.dart';
-import 'package:get/get.dart';
-import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:attendance/views/pages/home _screen.dart';
+import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'dart:developer';
 import 'package:http/http.dart' as http;
-import 'dart:io';
+import 'package:permission_handler/permission_handler.dart';
 
 class FaceScanController extends GetxController {
   CameraController? controller;
@@ -74,48 +73,40 @@ class FaceScanController extends GetxController {
 
       // Toggle camera index safely
       if (cameras.isNotEmpty) {
-        selectedCameraIndex = 
-            selectedCameraIndex < cameras.length - 1 ? selectedCameraIndex + 1 : 0;
-        
+        selectedCameraIndex = selectedCameraIndex < cameras.length - 1
+            ? selectedCameraIndex + 1
+            : 0;
+
         // Initialize new camera
         await initializeCamera(cameras[selectedCameraIndex]);
         update(); // Update UI
       } else {
-        print('No cameras available');
-        Get.snackbar(
-          'Error',
-          'No cameras available to switch to',
-          backgroundColor: Colors.red,
-          colorText: Colors.white
-        );
+        log('No cameras available');
+        Get.snackbar('Error', 'No cameras available to switch to',
+            backgroundColor: Colors.red, colorText: Colors.white);
       }
     } catch (e) {
-      print('Error toggling camera: $e');
-      Get.snackbar(
-        'Error',
-        'Failed to switch camera',
-        backgroundColor: Colors.red,
-        colorText: Colors.white
-      );
+      log('Error toggling camera: $e');
+      Get.snackbar('Error', 'Failed to switch camera',
+          backgroundColor: Colors.red, colorText: Colors.white);
     }
   }
 
   Future<void> captureAndSendPhoto() async {
     if (controller == null || !controller!.value.isInitialized || isCapturing) {
-      print('[FaceScanController] Camera not ready or already capturing.');
+      log('[FaceScanController] Camera not ready or already capturing.');
       return;
     }
 
     isCapturing = true;
     update();
-    print('[FaceScanController] Starting photo capture...');
+    log('[FaceScanController] Starting photo capture...');
 
     try {
       final XFile file = await controller!.takePicture();
-      print('[FaceScanController] Photo captured. Path: ' + file.path);
+      log('[FaceScanController] Photo captured. Path: ${file.path}');
       if (file.path.isEmpty) {
-        print(
-            '[FaceScanController] Failed to capture photo: file path is empty.');
+        log('[FaceScanController] Failed to capture photo: file path is empty.');
         Get.snackbar('Error', 'لم يتم التقاط الصورة بنجاح');
         isCapturing = false;
         update();
@@ -125,7 +116,7 @@ class FaceScanController extends GetxController {
       // Show loading indicator
       Get.dialog(const Center(child: CircularProgressIndicator()),
           barrierDismissible: false);
-      print('[FaceScanController] Sending photo to backend...');
+      log('[FaceScanController] Sending photo to backend...');
 
       // Prepare multipart request
       var uri = Uri.parse('https://do-system.com/api/Hrm/daily-image');
@@ -134,13 +125,13 @@ class FaceScanController extends GetxController {
       // Add Authorization header with the provided token
       request.headers['Authorization'] = 'Bearer $token';
 
-      print('[FaceScanController] Request prepared. Sending...');
+      log('[FaceScanController] Request prepared. Sending...');
       var response = await request.send();
-      print('[FaceScanController] Response status: ${response.statusCode}');
+      log('[FaceScanController] Response status: ${response.statusCode}');
       Get.back(); // Close loading dialog
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('[FaceScanController] Photo uploaded successfully.');
+        log('[FaceScanController] Photo uploaded successfully.');
         Get.snackbar(
           'Success',
           'Face image uploaded successfully',
@@ -154,8 +145,7 @@ class FaceScanController extends GetxController {
         Get.offAll(() => const HomeScreen());
       } else {
         final respStr = await response.stream.bytesToString();
-        print(
-            '[FaceScanController] Upload failed: ${response.statusCode} - $respStr');
+        log('[FaceScanController] Upload failed: ${response.statusCode} - $respStr');
         if (response.statusCode == 409) {
           Get.snackbar('Notice', "You've already uploaded today's image.");
           Get.back();
@@ -172,7 +162,7 @@ class FaceScanController extends GetxController {
         }
       }
     } catch (e) {
-      print('[FaceScanController] Exception: $e');
+      log('[FaceScanController] Exception: $e');
       Get.back();
       Get.snackbar('خطأ', 'حدث خطأ أثناء التقاط/رفع الصورة: $e');
       Get.back();
@@ -182,7 +172,7 @@ class FaceScanController extends GetxController {
     } finally {
       isCapturing = false;
       update();
-      print('[FaceScanController] Done.');
+      log('[FaceScanController] Done.');
     }
   }
 

@@ -1,3 +1,5 @@
+// ignore_for_file: must_be_immutable
+
 import 'dart:io';
 
 import 'package:attendance/core/controller/edit_profile_controller.dart';
@@ -16,15 +18,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 
-class EditProfileScreen extends StatelessWidget
-{
-
+class EditProfileScreen extends StatelessWidget {
   EditProfileController profileController = Get.put(EditProfileController());
   GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-
   EditProfileScreen({super.key});
-
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +35,11 @@ class EditProfileScreen extends StatelessWidget
             Icons.arrow_back_ios,
             color: AppColor.primaryColor,
           ),
-          onPressed: () => {Get.back(result: {
-            "profileImage":Prefs.getString(AppConstant.profileImage)
-          })},
+          onPressed: () => {
+            Get.back(result: {
+              "profileImage": Prefs.getString(AppConstant.profileImage)
+            })
+          },
         ),
         title: Text(
           "Edit Profile".tr,
@@ -50,119 +50,139 @@ class EditProfileScreen extends StatelessWidget
         ),
       ),
       backgroundColor: AppColor.cWhite,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
-        child: SingleChildScrollView(
-          child: Obx(
-                () => Form(
-                  key: formKey,
-                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.start,
-                                    crossAxisAlignment: CrossAxisAlignment.center,
-                                    children: [
-                  Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      CircleAvatar(
-                        radius: 60,
-                        backgroundColor: Colors.transparent,
-                        backgroundImage: profileImage(),
-                      ),
-                      GestureDetector(
-                        onTap: () {
-                          showModalBottomSheet(
-                            context: context,
-                            shape: const RoundedRectangleBorder(
-                                borderRadius: BorderRadius.vertical(
-                                    top: Radius.circular(16))),
-                            builder: (context) {
-                              return Container(
-                                decoration: const BoxDecoration(
-                                    borderRadius: BorderRadius.vertical(
-                                        top: Radius.circular(16))),
-                                padding: const EdgeInsets.symmetric(
-                                    vertical: 25, horizontal: 16),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    imageWidget(
-                                        title: "Camera".tr,
-                                        iconData: Icons.camera_alt,
-                                        imageSource: ImageSource.camera),
-                                    horizontalSpace(35),
-                                    imageWidget(
-                                        title: "Gallery".tr,
-                                        iconData: Icons.photo,
-                                        imageSource: ImageSource.gallery),
-                                  ],
-                                ),
-                              );
-                            },
-                          );
-                        },
-                        child: CircleAvatar(
-                          radius: 15,
-                          backgroundColor: AppColor.themeGreenColor,
-                          child: Icon(Icons.camera_alt,
-                              size: 18, color: AppColor.cWhite),
-                        ),
-                      )
-                    ],
-                  ),
-                  verticalSpace(20),
-                  CommonTextField(
-                    prefix: ImagePath.userEdit,
-                    controller: profileController.nameController,
-                    keyboardType: TextInputType.text,
-                    labelText: "Name".tr,
-                    validator: (value) {
-                      return Validator.validateName(value!, "Name");
-                    },
-                  ),
-                  verticalSpace(20),
-                  CommonTextField(
-                    prefix: ImagePath.emailIcn,
-                    controller: profileController.emailController,
-                    keyboardType: TextInputType.emailAddress,
-                    labelText: "Email".tr,
-                    validator: (value) {
-                      return Validator.validateEmail(value!);
-                    },
-                  ),
-                  verticalSpace(20),
-                  CommonTextField(
-                    prefix:ImagePath.phoneIcn,
-                    controller: profileController.phoneController,
-                    keyboardType: TextInputType.phone,
-                    labelText: "Phone".tr,
-                    validator: (value) {
-                      return Validator.validateMobile(value!);
-                    },
-                  ),
-                  verticalSpace(24),
-                  CommonButton(
-                    title: "Save Changes".tr,
-                    onPressed: () {
-                      if (Prefs.getBool(AppConstant.isDemoMode) == true) {
-                        commonToast(AppConstant.demoString);
-                      } else {
-                        if(formKey.currentState!.validate())
-                          {
-                            profileController.saveProfileData(
-                                email: profileController.emailController.text.trim(),
-                                name: profileController.nameController.text.trim(),
-                                phoneNo: profileController.phoneController.text.trim(),
-                                avatar: profileController.imagePath.value);
-                          }
+      body: GetBuilder<EditProfileController>(
+        builder: (controller) {
+          if (controller.isLoading.value) {
+            return const Center(
+              child: CircularProgressIndicator(),
+            );
+          }
 
-                      }
-                    },
-                  )
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 30, horizontal: 30),
+            child: SingleChildScrollView(
+              child: Form(
+                key: formKey,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Stack(
+                      alignment: Alignment.bottomRight,
+                      children: [
+                        GetBuilder<EditProfileController>(
+                          builder: (controller) => CircleAvatar(
+                            radius: 60,
+                            backgroundColor: Colors.transparent,
+                            backgroundImage: profileImage(),
+                          ),
+                        ),
+                        GestureDetector(
+                          onTap: () {
+                            showModalBottomSheet(
+                              context: context,
+                              shape: const RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.vertical(
+                                      top: Radius.circular(16))),
+                              builder: (context) {
+                                return Container(
+                                  decoration: const BoxDecoration(
+                                      borderRadius: BorderRadius.vertical(
+                                          top: Radius.circular(16))),
+                                  padding: const EdgeInsets.symmetric(
+                                      vertical: 25, horizontal: 16),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      imageWidget(
+                                          title: "Camera".tr,
+                                          iconData: Icons.camera_alt,
+                                          imageSource: ImageSource.camera),
+                                      horizontalSpace(35),
+                                      imageWidget(
+                                          title: "Gallery".tr,
+                                          iconData: Icons.photo,
+                                          imageSource: ImageSource.gallery),
                                     ],
                                   ),
+                                );
+                              },
+                            );
+                          },
+                          child: CircleAvatar(
+                            radius: 15,
+                            backgroundColor: AppColor.themeGreenColor,
+                            child: Icon(Icons.camera_alt,
+                                size: 18, color: AppColor.cWhite),
+                          ),
+                        )
+                      ],
+                    ),
+                    verticalSpace(20),
+                    CommonTextField(
+                      prefix: ImagePath.userEdit,
+                      controller: profileController.nameController,
+                      keyboardType: TextInputType.text,
+                      labelText: "Name".tr,
+                      validator: (value) {
+                        return Validator.validateName(value!, "Name");
+                      },
+                    ),
+                    verticalSpace(20),
+                    CommonTextField(
+                      prefix: ImagePath.emailIcn,
+                      controller: profileController.emailController,
+                      keyboardType: TextInputType.emailAddress,
+                      labelText: "Email".tr,
+                      validator: (value) {
+                        return Validator.validateEmail(value!);
+                      },
+                    ),
+                    verticalSpace(20),
+                    CommonTextField(
+                      prefix: ImagePath.phoneIcn,
+                      controller: profileController.phoneController,
+                      keyboardType: TextInputType.phone,
+                      labelText: "Phone".tr,
+                      validator: (value) {
+                        return Validator.validateMobile(value!);
+                      },
+                    ),
+                    verticalSpace(24),
+                    CommonButton(
+                      title: profileController.isLoading.value
+                          ? "Saving..."
+                          : "Save Changes".tr,
+                      onPressed: profileController.isLoading.value
+                          ? null
+                          : () {
+                              if (Prefs.getBool(AppConstant.isDemoMode) ==
+                                  true) {
+                                commonToast(AppConstant.demoString);
+                              } else {
+                                if (formKey.currentState!.validate()) {
+                                  profileController.saveProfileData(
+                                      email: profileController
+                                          .emailController.text
+                                          .trim(),
+                                      name: profileController
+                                          .nameController.text
+                                          .trim(),
+                                      phoneNo: profileController
+                                          .phoneController.text
+                                          .trim(),
+                                      avatar:
+                                          profileController.imagePath.value);
+                                }
+                              }
+                            },
+                    ),
+                  ],
                 ),
-          ),
-        ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -170,10 +190,12 @@ class EditProfileScreen extends StatelessWidget
   void showImagePickerDialog(BuildContext context) {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
       builder: (context) {
         return Container(
-          decoration: const BoxDecoration(borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
+          decoration: const BoxDecoration(
+              borderRadius: BorderRadius.vertical(top: Radius.circular(16))),
           padding: const EdgeInsets.symmetric(vertical: 25, horizontal: 16),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -194,17 +216,19 @@ class EditProfileScreen extends StatelessWidget
     );
   }
 
-
-  ImageProvider profileImage()
-  {
+  ImageProvider profileImage() {
     return profileController.imagePath.value.isNotEmpty
         ? FileImage(File(profileController.imagePath.value))
-        : Image(image: profileController.profileImage.value.isNotEmpty
-        ? CachedNetworkImageProvider(profileController.profileImage.value)
-        :AssetImage(ImagePath.placeholder) as ImageProvider).image;
+        : Image(
+                image: profileController.profileImage.value.isNotEmpty
+                    ? CachedNetworkImageProvider(
+                        profileController.profileImage.value)
+                    : AssetImage(ImagePath.placeholder) as ImageProvider)
+            .image;
   }
 
-  Widget imageWidget({ImageSource? imageSource, String? title, IconData? iconData}) {
+  Widget imageWidget(
+      {ImageSource? imageSource, String? title, IconData? iconData}) {
     return GestureDetector(
       onTap: () {
         profileController.pickImage(imageSource: imageSource!);
@@ -214,10 +238,10 @@ class EditProfileScreen extends StatelessWidget
         children: [
           Icon(iconData, color: AppColor.cDarkGreyFont, size: 55),
           verticalSpace(8),
-          Text(title!, style: pSemiBold19.copyWith(color: AppColor.cDarkGreyFont))
+          Text(title!,
+              style: pSemiBold19.copyWith(color: AppColor.cDarkGreyFont))
         ],
       ),
     );
   }
-
 }

@@ -1,13 +1,10 @@
 import 'package:attendance/utils/app_color.dart';
-import 'package:attendance/utils/app_constant.dart';
-import 'package:attendance/utils/prefer.dart';
+import 'package:attendance/views/widgets/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
-
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:attendance/views/widgets/splash_screen.dart';
 
 GetStorage? getStorage;
 
@@ -36,12 +33,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
-    String languageCode = Prefs.getString(AppConstant.languageCode) == ''
-        ? 'en'
-        : Prefs.getString(AppConstant.languageCode);
-    String countryCode =
-        Prefs.getString(AppConstant.languageCode) == 'ar' ? 'AR' : 'US';
-    Locale locale = Locale(languageCode, countryCode);
+    // String languageCode = Prefs.getString(AppConstant.languageCode) == ''
+    //     ? 'en'
+    //     : Prefs.getString(AppConstant.languageCode);
+    // String countryCode =
+    //     Prefs.getString(AppConstant.languageCode) == 'ar' ? 'AR' : 'US';
+    // Locale locale = Locale(languageCode, countryCode);
 
     return ScreenUtilInit(
       designSize: const Size(360, 690), // Set your design size here

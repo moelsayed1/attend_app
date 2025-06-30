@@ -1,12 +1,14 @@
 import 'dart:convert';
 import 'dart:io'; // Import for SocketException
+
+import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
+import 'dart:developer';
 import '../utils/base_api.dart';
 import '../utils/common_snackbar_widget.dart';
 import '../utils/prefer.dart';
 import '../views/pages/login_screen.dart';
 import '../views/widgets/loading_widget.dart';
-import 'package:get/get.dart';
 
 class NetworkHttps {
   // accessToken is not used here, consider removing if not needed or make it static
@@ -33,20 +35,20 @@ class NetworkHttps {
 
   static Future<Map<String, dynamic>> getRequest(String endPoint) async {
     var getUrl = API.baseUrl + endPoint;
-    print("GET API URL===> $getUrl");
-    print("authHeaders===>[0m");
+    log("GET API URL===> $getUrl");
+    log("authHeaders===>[0m");
     Loader.showLoader(); // Show loader for every API call
     try {
       var response =
           await http.get(Uri.parse(getUrl), headers: await _getHeaders());
-      print("statusCode===> " + response.statusCode.toString());
-      print("response body===> " + response.body);
+      log("statusCode===> ${response.statusCode}");
+      log("response body===> ${response.body}");
 
       Map<String, dynamic> responseBody;
       final contentType = response.headers['content-type'] ?? '';
       if (!contentType.contains('application/json')) {
         // Not JSON, likely an HTML error page
-        print("Non-JSON response: ${response.body}");
+        log("Non-JSON response: ${response.body}");
         String message = "Unexpected server response. Please try again later.";
         if (response.statusCode == 405) {
           message =
@@ -71,7 +73,7 @@ class NetworkHttps {
         }
       } catch (e) {
         // If JSON decoding fails, return a structured error with raw status code
-        print("Error decoding GET response body: $e");
+        log("Error decoding GET response body: $e");
         responseBody = {
           "status": response.statusCode,
           "message": "Invalid JSON response from server: $e"
@@ -106,7 +108,7 @@ class NetworkHttps {
       return {"status": -2, "message": "HTTP client error: ${e.message}"};
     } catch (e) {
       Loader.hideLoader();
-      print("err->${e.toString()}");
+      log("err->${e.toString()}");
       commonToast("An unexpected error occurred.");
       return {
         "status": -3,
@@ -117,26 +119,101 @@ class NetworkHttps {
     }
   }
 
-  static Future<Map<String, dynamic>> postRequest(
-      String endPoint, Map data) async {
-    String postUrl = API.baseUrl + endPoint;
-    print("POST API URL===> $postUrl");
-    print("data===> ${jsonEncode(data)}");
-    print("authHeaders===>${Prefs.getToken()}");
-    Loader.showLoader(); // Show loader for every API call
+  // Version without loader for use during initialization
+  static Future<Map<String, dynamic>> getRequestWithoutLoader(
+      String endPoint) async {
+    var getUrl = API.baseUrl + endPoint;
+    log("GET API URL (no loader)===> $getUrl");
+    log("authHeaders===>[0m");
     try {
-      var response = await http.post(Uri.parse(postUrl),
-          body: jsonEncode(data), headers: await _getHeaders());
-      print("statusCode===> ${response.statusCode}");
-      print("response body===> ${response.body}");
-      print(
-          "response c===> ${response.statusCode == 200 || response.statusCode == 201}");
+      var response =
+          await http.get(Uri.parse(getUrl), headers: await _getHeaders());
+      log("statusCode===> ${response.statusCode}");
+      log("response body===> ${response.body}");
 
       Map<String, dynamic> responseBody;
       final contentType = response.headers['content-type'] ?? '';
       if (!contentType.contains('application/json')) {
         // Not JSON, likely an HTML error page
-        print("Non-JSON response: ${response.body}");
+        log("Non-JSON response: ${response.body}");
+        String message = "Unexpected server response. Please try again later.";
+        if (response.statusCode == 405) {
+          message =
+              "Method Not Allowed (405). Please contact support or check your request.";
+        }
+        return {
+          "status": response.statusCode,
+          "message": message,
+          "raw": response.body
+        };
+      }
+      try {
+        if (response.body.isNotEmpty) {
+          responseBody = json.decode(response.body);
+        } else {
+          // Fallback for empty body, assume some generic error structure
+          responseBody = {
+            "status": response.statusCode,
+            "message": "Empty response body"
+          };
+        }
+      } catch (e) {
+        // If JSON decoding fails, return a structured error with raw status code
+        log("Error decoding GET response body: $e");
+        responseBody = {
+          "status": response.statusCode,
+          "message": "Invalid JSON response from server: $e"
+        };
+      }
+
+      if (response.statusCode == 401) {
+        await Prefs.clear();
+        Get.offAll(() => LoginScreen());
+        Get.deleteAll(); // Ensure controllers are cleaned up
+        // Return a specific map to indicate unauthorized and redirection happened
+        return {
+          "status": 401,
+          "message": "Unauthorized. Redirecting to login."
+        };
+      } else {
+        // For all other status codes, return the parsed response body
+        // The caller will then check `responseBody['status']` etc.
+        return responseBody;
+      }
+    } on SocketException {
+      return {"status": 0, "message": "No Internet connection."};
+    } on FormatException catch (e) {
+      return {"status": -1, "message": "Invalid response format: $e"};
+    } on http.ClientException catch (e) {
+      return {"status": -2, "message": "HTTP client error: ${e.message}"};
+    } catch (e) {
+      log("err->${e.toString()}");
+      return {
+        "status": -3,
+        "message": "An unexpected error occurred: ${e.toString()}"
+      };
+    }
+  }
+
+  static Future<Map<String, dynamic>> postRequest(
+      String endPoint, Map data) async {
+    String postUrl = API.baseUrl + endPoint;
+    log("POST API URL===> $postUrl");
+    log("data===> ${jsonEncode(data)}");
+    log("authHeaders===>${Prefs.getToken()}");
+    //  Loader.showLoader(); // Show loader for every API call
+    try {
+      var response = await http.post(Uri.parse(postUrl),
+          body: jsonEncode(data), headers: await _getHeaders());
+      log("statusCode===> ${response.statusCode}");
+      log("response body===> ${response.body}");
+      log("response c===> ${response.statusCode == 200 || response.statusCode == 201}");
+
+      Map<String, dynamic> responseBody;
+      final contentType = response.headers['content-type'] ?? '';
+      if (!contentType.contains('application/json')) {
+        // Not JSON, likely an HTML error page
+        log("Non-JSON response: ${response.body}");
         String message = "Unexpected server response. Please try again later.";
         if (response.statusCode == 405) {
           message =
@@ -159,7 +236,7 @@ class NetworkHttps {
           };
         }
       } catch (e) {
-        print("Error decoding POST response body: $e");
+        log("Error decoding POST response body: $e");
         responseBody = {
           "status": response.statusCode,
           "message": "Invalid JSON response from server: $e"
@@ -182,46 +259,51 @@ class NetworkHttps {
         return responseBody;
       }
     } on SocketException {
-      Loader.hideLoader();
+      // Loader.hideLoader();
+      Get.forceAppUpdate();
       commonToast("No Internet connection.");
       return {"status": 0, "message": "No Internet connection."};
     } on FormatException catch (e) {
-      Loader.hideLoader();
+      //  Loader.hideLoader();
+      Get.forceAppUpdate();
       commonToast("Invalid response format from server.");
       return {"status": -1, "message": "Invalid response format: $e"};
     } on http.ClientException catch (e) {
-      Loader.hideLoader();
+      //  Loader.hideLoader();
+      Get.forceAppUpdate();
       commonToast("HTTP client error: ${e.message}");
       return {"status": -2, "message": "HTTP client error: ${e.message}"};
     } catch (e) {
-      Loader.hideLoader();
-      print("err->${e.toString()}");
+      //  Loader.hideLoader();
+      Get.forceAppUpdate();
+      log("err->${e.toString()}");
       commonToast("An unexpected error occurred.");
       return {
         "status": -3,
         "message": "An unexpected error occurred: ${e.toString()}"
       };
     } finally {
-      Loader.hideLoader(); // Ensure loader is hidden in all cases
+      //  Loader.hideLoader(); // Ensure loader is hidden in all cases
+      Get.forceAppUpdate();
     }
   }
 
   static Future<Map<String, dynamic>> deleteRequest(String endPoint) async {
     String deleteUrl = API.baseUrl + endPoint;
-    print("DELETE API URL===> $deleteUrl");
-    print("authHeaders===>${Prefs.getToken()}");
+    log("DELETE API URL===> $deleteUrl");
+    log("authHeaders===>${Prefs.getToken()}");
     Loader.showLoader(); // Show loader for every API call
     try {
       var response =
           await http.delete(Uri.parse(deleteUrl), headers: await _getHeaders());
-      print("statusCode===> ${response.statusCode}");
-      print("response body===> ${response.body}");
+      log("statusCode===> ${response.statusCode}");
+      log("response body===> ${response.body}");
 
       Map<String, dynamic> responseBody;
       final contentType = response.headers['content-type'] ?? '';
       if (!contentType.contains('application/json')) {
         // Not JSON, likely an HTML error page
-        print("Non-JSON response: ${response.body}");
+        log("Non-JSON response: ${response.body}");
         String message = "Unexpected server response. Please try again later.";
         if (response.statusCode == 405) {
           message =
@@ -245,7 +327,7 @@ class NetworkHttps {
           };
         }
       } catch (e) {
-        print("Error decoding DELETE response body: $e");
+        log("Error decoding DELETE response body: $e");
         responseBody = {
           "status": response.statusCode,
           "message": "Invalid JSON response from server: $e"
@@ -284,7 +366,7 @@ class NetworkHttps {
     } catch (e) {
       Loader.hideLoader();
       commonToast("An unexpected error occurred.");
-      print("err->${e.toString()}");
+      log("err->${e.toString()}");
       return {
         "status": -3,
         "message": "An unexpected error occurred: ${e.toString()}"
