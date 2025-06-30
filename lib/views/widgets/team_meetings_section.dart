@@ -6,6 +6,7 @@ import 'package:attendance/utils/ui_text_style.dart';
 import 'package:attendance/views/widgets/common_space_divider_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 class TeamMeetingsSection extends StatelessWidget {
   final HomeController homeController;
@@ -24,7 +25,7 @@ class TeamMeetingsSection extends StatelessWidget {
             style: pSemiBold21.copyWith(color: AppColor.cBlack),
           ),
         ),
-        verticalSpace(16),
+        verticalSpace(16.h),
         Obx(() => ListView.builder(
               physics: NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -74,7 +75,7 @@ class TeamMeetingsSection extends StatelessWidget {
                                       ),
                                     ),
                                   ),
-                                  verticalSpace(8),
+                                  verticalSpace(8.h),
                                 ],
                                 if (meeting['record_meeting_link'] != null) ...[
                                   InkWell(
@@ -105,18 +106,18 @@ class TeamMeetingsSection extends StatelessWidget {
                     }
                   },
                   child: Container(
-                    margin: EdgeInsets.only(bottom: 16),
-                    padding: EdgeInsets.all(16),
+                    margin: EdgeInsets.only(bottom: 16.h),
+                    padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
                       color: AppColor.cWhite,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: statusColor, width: 2),
+                      borderRadius: BorderRadius.circular(12.r),
+                      border: Border.all(color: statusColor, width: 2.w),
                       boxShadow: [
                         BoxShadow(
                           color: statusColor.withOpacity(0.1),
-                          spreadRadius: 1,
-                          blurRadius: 4,
-                          offset: Offset(0, 2),
+                          spreadRadius: 1.r,
+                          blurRadius: 4.r,
+                          offset: Offset(0, 2.h),
                         ),
                       ],
                     ),
@@ -134,10 +135,10 @@ class TeamMeetingsSection extends StatelessWidget {
                             ),
                             Container(
                               padding: EdgeInsets.symmetric(
-                                  horizontal: 8, vertical: 4),
+                                  horizontal: 8.w, vertical: 4.h),
                               decoration: BoxDecoration(
                                 color: statusColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
+                                borderRadius: BorderRadius.circular(12.r),
                               ),
                               child: Text(
                                 meeting['status'].toString().toUpperCase(),
@@ -146,30 +147,30 @@ class TeamMeetingsSection extends StatelessWidget {
                             ),
                           ],
                         ),
-                        verticalSpace(12),
+                        verticalSpace(12.h),
                         Row(
                           children: [
                             Icon(Icons.calendar_today,
-                                size: 16, color: AppColor.textColor),
-                            SizedBox(width: 4),
+                                size: 16.sp, color: AppColor.textColor),
+                            SizedBox(width: 4.w),
                             Text(
                               meeting['start_date'] ?? 'No date',
                               style:
                                   pMedium14.copyWith(color: AppColor.textColor),
                             ),
-                            SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             Icon(Icons.access_time,
-                                size: 16, color: AppColor.textColor),
-                            SizedBox(width: 4),
+                                size: 16.sp, color: AppColor.textColor),
+                            SizedBox(width: 4.w),
                             Text(
                               meeting['start_time'] ?? 'No time',
                               style:
                                   pMedium14.copyWith(color: AppColor.textColor),
                             ),
-                            SizedBox(width: 16),
+                            SizedBox(width: 16.w),
                             Icon(Icons.timer,
-                                size: 16, color: AppColor.textColor),
-                            SizedBox(width: 4),
+                                size: 16.sp, color: AppColor.textColor),
+                            SizedBox(width: 4.w),
                             Text(
                               'Duration: ${meeting['duration'] ?? 'N/A'}',
                               style:
@@ -177,25 +178,25 @@ class TeamMeetingsSection extends StatelessWidget {
                             ),
                           ],
                         ),
-                        verticalSpace(8),
+                        verticalSpace(8.h),
                         if (meeting['note'] != null) ...[
                           Text(
                             'Note:',
                             style: pSemiBold14.copyWith(color: AppColor.cBlack),
                           ),
-                          verticalSpace(4),
+                          verticalSpace(4.h),
                           Text(
                             meeting['note'],
                             style:
                                 pMedium14.copyWith(color: AppColor.textColor),
                           ),
-                          verticalSpace(8),
+                          verticalSpace(8.h),
                         ],
                         Row(
                           children: [
                             Icon(Icons.meeting_room,
-                                size: 16, color: AppColor.textColor),
-                            SizedBox(width: 4),
+                                size: 16.sp, color: AppColor.textColor),
+                            SizedBox(width: 4.w),
                             Text(
                               'Meeting Type: ${meeting['meeting_type']?.toString().toUpperCase() ?? 'N/A'}',
                               style:
@@ -203,13 +204,13 @@ class TeamMeetingsSection extends StatelessWidget {
                             ),
                           ],
                         ),
-                        verticalSpace(8),
+                        verticalSpace(8.h),
                         if (meeting['meeting_link'] != null) ...[
                           Row(
                             children: [
                               Icon(Icons.link,
-                                  size: 16, color: AppColor.textColor),
-                              SizedBox(width: 4),
+                                  size: 16.sp, color: AppColor.textColor),
+                              SizedBox(width: 4.w),
                               Expanded(
                                 child: Text(
                                   'Meeting Link: ${meeting['meeting_link']}',
@@ -220,14 +221,14 @@ class TeamMeetingsSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          verticalSpace(8),
+                          verticalSpace(8.h),
                         ],
                         if (meeting['record_meeting_link'] != null) ...[
                           Row(
                             children: [
                               Icon(Icons.videocam,
-                                  size: 16, color: AppColor.textColor),
-                              SizedBox(width: 4),
+                                  size: 16.sp, color: AppColor.textColor),
+                              SizedBox(width: 4.w),
                               Expanded(
                                 child: Text(
                                   'Recording: ${meeting['record_meeting_link']}',
@@ -238,19 +239,19 @@ class TeamMeetingsSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          verticalSpace(8),
+                          verticalSpace(8.h),
                         ],
                         if (meeting['lead'] != null) ...[
                           Text(
                             'Lead Information:',
                             style: pSemiBold14.copyWith(color: AppColor.cBlack),
                           ),
-                          verticalSpace(4),
+                          verticalSpace(4.h),
                           Row(
                             children: [
                               Icon(Icons.person,
-                                  size: 16, color: AppColor.textColor),
-                              SizedBox(width: 4),
+                                  size: 16.sp, color: AppColor.textColor),
+                              SizedBox(width: 4.w),
                               Text(
                                 meeting['lead']['name'] ?? 'N/A',
                                 style: pMedium14.copyWith(
@@ -258,12 +259,12 @@ class TeamMeetingsSection extends StatelessWidget {
                               ),
                             ],
                           ),
-                          verticalSpace(4),
+                          verticalSpace(4.h),
                           Row(
                             children: [
                               Icon(Icons.phone,
-                                  size: 16, color: AppColor.textColor),
-                              SizedBox(width: 4),
+                                  size: 16.sp, color: AppColor.textColor),
+                              SizedBox(width: 4.w),
                               Text(
                                 meeting['lead']['phone'] ?? 'N/A',
                                 style: pMedium14.copyWith(

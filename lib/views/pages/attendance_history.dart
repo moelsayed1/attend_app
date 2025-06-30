@@ -1,7 +1,6 @@
 // ignore_for_file: invalid_use_of_protected_member
 
 import 'package:attendance/core/controller/attendence_history_controller.dart';
-import 'package:attendance/core/model/attendance_history.dart';
 import 'package:attendance/utils/app_color.dart';
 import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/image_path.dart';

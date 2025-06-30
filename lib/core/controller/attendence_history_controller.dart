@@ -1,7 +1,6 @@
 // ignore_for_file: prefer_interpolation_to_compose_strings
 
 import 'package:attendance/core/model/attendance_history.dart';
-import 'package:attendance/network_dio/network_dio.dart';
 import 'package:attendance/network_dio/requests.dart';
 import 'package:attendance/utils/app_constant.dart';
 import 'package:attendance/utils/base_api.dart';
